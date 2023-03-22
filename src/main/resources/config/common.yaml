@@ -1,0 +1,55 @@
+cloudhub:
+  reconnectionfrequency: "10000"
+  reconnectionattempts: "3"
+http:
+  port: "8091"
+basepath: "/api/v1"
+
+testsapi:
+  host: "prx-salesforce-sapi-test.uk-e1.cloudhub.io"
+  port: "80"
+  basepath: "/api/v1"
+salesforce:
+  reconnectionfrequency: "10000"
+  reconnectionattempts: "3"
+salesforceSAPI:
+  reconnectionfrequency: "10000"
+  reconnectionattempts: "3"
+TrasedumpSAPI:
+  reconnectionfrequency: "10000"
+  reconnectionattempts: "3"
+
+
+
+successstatuscodes: "200,201"
+  
+  
+
+JarrowLiftingInterfaceID: "JarrowLifting"
+DagenhamLiftingInterfaceID: "DagenhamLifting"
+GrangemouthLifitngInterfaceID: "GrangemouthLifitng"
+KillingholmeLiftingInterfaceID: "KillingholmeLifting"
+KingsburyLiftingInterfaceID: "KingsburyLifting"
+NustarLiftingInterfaceID: "NustarLifting"
+PlymouthLiftingInterfaceID: "PlymouthLifting"
+WesterleighLiftingInterfaceID: "WesterleighLifting"
+GenericLiftingInterfaceID: "GenericLifting"
+ThirdPartyLiftingInterfaceID: "ThirdPartyLifting"
+ReleaseNumberInterfaceID: "ReleaseNumber"
+TradedumpLiftingInterfaceID: "TradedumpLifting"
+OpayoInterfaceID: "TotalOpayoSettlement"
+ 
+
+
+anypointmqurl: "https://mq-eu-west-2.anypoint.mulesoft.com/api/v1"
+
+releasenumberqueue: "olf-releasenumber-fifo-queue"
+tradedumpqueue: "tradedump-lifting-fifo-queue"
+
+ 
+httpresponse:
+ timeout: "360000"
+ 
+httpreconnection:
+ frequency: "10000"
+ attempts: "3"

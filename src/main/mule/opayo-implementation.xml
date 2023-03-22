@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+
+	<flow name="opayo-implementationFlow" doc:id="c763d341-59a7-4091-830f-72610f7c459f" >
+		 <sftp:listener doc:name="opayoFileListener" doc:id="04701c01-f855-490d-82fd-79258c1546ac" recursive="false" directory="${sftpdir.opayo.unprocessed}" moveToDirectory="#[vars.targetfolder]" config-ref="SFTP_Config" renameTo="#[(vars.dataEntityValue replace  /.a50/ with (&quot;&quot;)) ++ (now() as String {format: &quot;yyyyMMddHHmmss&quot;}) ++ '.a50']" outputMimeType='application/flatfile; schemapath="schemas/opayo.ffd"; recordparsing=lenient'>
+			<reconnect frequency="${sftp.reconnectionfrequency}" count="${sftp.reconnectionattempts}" />
+			<scheduling-strategy>
+				<fixed-frequency frequency="${frequency.opayo}" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="${filepattern.opayo}" />
+		</sftp:listener> 
+		<logger level="INFO" doc:name="Logger" doc:id="9f096309-bc40-443e-9831-2928e72192de" message="::Started::::::#[payload] ::"/>
+		<ee:transform doc:name="setVariables" doc:id="039e2927-c135-42d6-83d1-caa5cc59ea19" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="interfaceID"><![CDATA[%dw 2.0
+output text/plain
+---
+p('OpayoInterfaceID')]]></ee:set-variable>
+				<ee:set-variable variableName="trackingID"><![CDATA[%dw 2.0
+output text/plain
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityName"><![CDATA[%dw 2.0
+output text/plain
+---
+'OpayoReport']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityType"><![CDATA[%dw 2.0
+output text/plain
+---
+'Alphanumeric']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityValue"><![CDATA[%dw 2.0
+output text/plain
+---
+attributes.fileName]]></ee:set-variable>
+				<ee:set-variable variableName="messageID" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="inputFilePath" ><![CDATA[p('sftpdir.opayo.unprocessed')]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<!-- <ee:transform doc:name="CSV" doc:id="0959b827-b7e1-460e-a957-d992b810279d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="csvValues" ><![CDATA[%dw 2.0
+output application/csv separator=";", header=false
+-&#45;&#45;
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8313f0e5-138b-4741-959f-18a84e96775f" message=":::AfterCSV DW: #[vars.csvValues]:"/> -->
+		<logger level="INFO" doc:name="logStart" doc:id="25983d95-8b9a-435e-a2ca-2487bdc499be" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Start of flow and message received from listener"
+&#10;}]' />
+		<try doc:name="Try" doc:id="aefba284-90f4-4f73-80f4-1103e182d51a" >
+			 <async doc:name="Async" doc:id="0d4c9b7b-2dbe-488b-ae53-8ae17238d64f">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="b65e2e30-8f96-40da-8167-79b2c3836802" name="payloadLoggerStartFlow" />
+		</async> 
+			<!-- <ee:transform doc:name="setRequest" doc:id="32ae43b1-45a7-43a3-8760-6986cc18a6b6">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0 
+import lines from dw::core::Strings output application/json 
+-&#45;&#45; 
+lines(payload)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<!-- <ee:transform doc:name="setRequest" doc:id="c798479c-bfbc-4847-8435-8a59c57f1242">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun getCustomerRef(loadNo: Number, customerRef: Number) =
+if ( customerRef matches(/([0-9]{1}$)/)) 
+loadNo
+else
+customerRef
+-&#45;&#45;
+{
+    liftingreport: payload filter ((item, index) -> item."Stockholder" == "Prax") map ((jarrow, indexofjarrow) -> 
+     {
+        "bolNumber": getCustomerRef((jarrow."Load No" replace  /"/ with ("")), (jarrow."Customer Ref" replace  /"/ with (""))),
+        "fileName": attributes.fileName,
+        "authorisationCode": jarrow."Auth Code",
+        "orderNumber": null,
+        "externalReference": null,
+        "vehicleRegistration": null,
+        "trailerNumber": null,
+        "driverName": null,
+        "haulierId": null,
+        "haulier": null,
+        "terminal": "Jarrow",
+        "stockholderId": null,
+        "stockholder": jarrow."Stockholder",
+        "clientId": null,
+        "client": null,
+        "customerId": null,
+        "customer": jarrow."Alloc Ref",
+        "loadedDate": (jarrow."Lifting Date" as LocalDateTime {format: "dd/MM/yyyy HH:mm"} as DateTime{format: "yyyy-MM-dd'T'HH:mm':00'"}),
+        "productCode": null,
+        "productName": jarrow."Product",
+        "productNatural": (jarrow."Litres" replace  /,/ with ("")) as Number,
+        "productStandard": (jarrow."Litres 15" replace  /,/ with ("")) as Number,
+        "productWeight": (jarrow."Kg in air" replace  /,/ with ("")) as Number,
+        "density": jarrow."Density in vac",
+        "temperature": jarrow."Temperature",
+        "tank": jarrow."Tank Name",
+        "dutyType": null,
+        "loadNo": jarrow."Load No",
+        "customerRef": null, 
+        "carrier": jarrow."Carrier",
+        "description": null,
+        "cust_ref_no": null,
+        "destination": jarrow."Ship To",
+        "doc_num": null,
+        "dutyPayable": null,
+        "dutyFree": null,
+        "dutyOther": null,
+        "dutyPaid": null,
+        "dutyDrawback": null,
+        "dutyStatus": jarrow."Duty Status",
+        "clientCode": null,
+        "addve_ppm": null,
+        "stoltRef": null,
+        "productWeightinVac": jarrow."Kg in vac",
+        "cardNumber": null,
+        "carrierCode":null,
+        "tractorLicence":null,
+        "naturalVolumeRefuel":null,
+        "standardVolumeRefuel":null
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> -->
+			<!-- <http:request method="POST" doc:name="invokeSystemAPI" doc:id="db92707f-6e83-4a7b-a6c0-45f212b110ba" config-ref="HTTP_Request_configuration" path=" ${systemapi.liftingreports}" responseTimeout="${httpresponse.timeout}">
+			<reconnect frequency="${httpreconnection.frequency}" count="${httpreconnection.attempts}" />
+				<http:headers><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	dataEntityName : vars.dataEntityName,
+	dataEntityValue : vars.dataEntityValue,
+	trackingID : vars.trackingID
+}]]]></http:headers>
+		</http:request> -->
+			<!-- <ee:transform doc:name="Transform Message" doc:id="f0cbbd4d-c409-4e74-bd69-42d546ced6cd" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0 
+import lines from dw::core::Strings 
+output application/json 
+-&#45;&#45; 
+payload map ((opayo, index) ->  {
+   "MessageClass4":opayo[0 to 55]
+})]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<ee:transform doc:name="Transform to JSON" doc:id="2d48cf00-c4de-4b9c-81c0-c127c4e531c8" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="1d9dc5fd-bfdb-4f9e-9b48-5a64bcbef6b8" message="((((((((((AfterFileReadingOutput))):#[payload]::::::"/>
+			<ee:transform doc:name="setRequestSAPB1" doc:id="2734097e-8dd6-44e9-81fb-165314df9582" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+//input application/flatfile schemaPath = "schemas/opayo.ffd"
+---
+{
+	//FileHeader: {
+		//"Beginning of a file": payload.FileHeader."Beginning of a file"
+	//},
+	TransactionDetails: payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass4: transactionDetail.MessageClass4 map ( messageClass4 , indexOfMessageClass4 ) -> {
+			TransactionNumber: messageClass4.TransactionNumber,
+			AuthorisationCode: messageClass4.AuthorisationCode,
+			ShiftMark: messageClass4.ShiftMark,
+			TransactionTime: messageClass4.TransactionTime,
+			TransactionType: messageClass4.TransactionType,
+			MessageClass: messageClass4.MessageClass,
+			Amount: messageClass4.Amount,
+			CardIssueNumber: messageClass4.CardIssueNumber,
+			CardholderNumber: messageClass4.CardholderNumber,
+			DiscretionaryData1: messageClass4.DiscretionaryData1,
+			TerminalType: messageClass4.TerminalType,
+			CardExpiryDate: messageClass4.CardExpiryDate,
+			TransactionDate: messageClass4.TransactionDate,
+			ReservedUKCards1: messageClass4.ReservedUKCards1,
+			TransactionSource: messageClass4.TransactionSource
+			//MessageClass4Table: "MessageClass4"
+		},
+		TransactionHeader: {
+			//TerminalId: transactionDetail.TransactionHeader.TerminalId replace "," with "",
+			//CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionHeader.Indicator,
+			TransactionHeaderValue: transactionDetail.TransactionHeader.TransactionHeaderValue
+			//TransactionTime: transactionDetail.TransactionHeader.TransactionTime replace "," with "",
+			//ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionHeader.BatchNumber replace "," with "",
+			//MerchantId: transactionDetail.TransactionHeader.MerchantId replace "," with "",
+			//TransactionDate: transactionDetail.TransactionHeader.TransactionDate replace "," with "",
+			//CreditMerchantId: transactionDetail.TransactionHeader.CreditMerchantId replace "," with ""
+			//TransactionHeaderTable: "TransHeader"
+		},
+		TransactionTrailer: {
+			//TerminalId: transactionDetail.TransactionTrailer.TerminalId replace "," with "",
+			//CurrencyCode: transactionDetail.TransactionTrailer.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionTrailer.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionTrailer.Indicator,
+			TransactionTrailerValue: transactionDetail.TransactionTrailer.TransactionTrailerValue
+			//TransactionTime: transactionDetail.TransactionTrailer.TransactionTime replace "," with "",
+			//ClientId: transactionDetail.TransactionTrailer.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionTrailer.BatchNumber replace "," with "",
+			//MerchantId: transactionDetail.TransactionTrailer.MerchantId replace "," with "",
+			//TransactionDate: transactionDetail.TransactionTrailer.TransactionDate replace "," with "",
+			//CreditMerchantId: transactionDetail.TransactionTrailer.CreditMerchantId replace "," with ""
+			//TransactionTrailerTable: "TransTrailer"
+		},
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass2 ) -> {
+			MessageClass: messageClass2.MessageClass,
+			ShiftMark: messageClass2.ShiftMark,
+			TransactionNumber: messageClass2.TransactionNumber,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			ProductCode1: messageClass2.ProductCode1,
+			ProductValue1: messageClass2.ProductValue1,
+			ProductQuantity1: messageClass2.ProductQuantity1,
+			ProductCode2: messageClass2.ProductCode2,
+			ProductValue2: messageClass2.ProductValue2,
+			ProductQuantity2: messageClass2.ProductQuantity2,
+			ProductCode3: messageClass2.ProductCode3,
+			ProductValue3: messageClass2.ProductValue3,
+			ProductQuantity3: messageClass2.ProductQuantity3,
+			ProductCode4: messageClass2.ProductCode4,
+			ProductValue4: messageClass2.ProductValue4,
+			ProductQuantity4: messageClass2.ProductQuantity4			
+			//ProductInformation1: messageClass2.ProductInformation1,			
+			//ProductInformation2: messageClass2.ProductInformation2,			
+			//ProductQuantity: messageClass2.ProductQuantity
+			//MessageClass2Table: "MessageClass2"
+		},
+		MessageClass3: transactionDetail.MessageClass3 map ( messageClass3 , indexOfMessageClass3 ) -> {
+			TransactionNumber: messageClass3.TransactionNumber,
+			ShiftMark: messageClass3.ShiftMark,
+			VehicleRegistrationNumber: messageClass3.VehicleRegistrationNumber,
+			MessageClass: messageClass3.MessageClass,
+			KilometreMileage: messageClass3.KilometreMileage,
+			MessageType: messageClass3.MessageType
+			//MessageClass3Table: "MessageClass3"
+		}
+	}
+	//FileTrailer: payload.FileTrailer."End of a file"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="originallPayload" ><![CDATA[%dw 2.0
+
+output application/json
+//input application/flatfile schemaPath = "schemas/opayo.ffd"
+---
+{
+	//FileHeader: {
+		//"Beginning of a file": payload.FileHeader."Beginning of a file"
+	//},
+	TransactionDetails: payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass4: transactionDetail.MessageClass4 map ( messageClass4 , indexOfMessageClass4 ) -> {
+			TransactionNumber: messageClass4.TransactionNumber,
+			AuthorisationCode: messageClass4.AuthorisationCode,
+			ShiftMark: messageClass4.ShiftMark,
+			TransactionTime: messageClass4.TransactionTime,
+			TransactionType: messageClass4.TransactionType,
+			MessageClass: messageClass4.MessageClass,
+			Amount: messageClass4.Amount,
+			CardIssueNumber: messageClass4.CardIssueNumber,
+			CardholderNumber: messageClass4.CardholderNumber,
+			DiscretionaryData1: messageClass4.DiscretionaryData1,
+			TerminalType: messageClass4.TerminalType,
+			CardExpiryDate: messageClass4.CardExpiryDate,
+			TransactionDate: messageClass4.TransactionDate,
+			ReservedUKCards1: messageClass4.ReservedUKCards1,
+			TransactionSource: messageClass4.TransactionSource
+			//MessageClass4Table: "MessageClass4"
+		},
+		TransactionHeader: {
+			//TerminalId: transactionDetail.TransactionHeader.TerminalId replace "," with "",
+			//CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionHeader.Indicator,
+			TransactionHeaderValue: transactionDetail.TransactionHeader.TransactionHeaderValue
+			//TransactionTime: transactionDetail.TransactionHeader.TransactionTime replace "," with "",
+			//ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionHeader.BatchNumber replace "," with "",
+			//MerchantId: transactionDetail.TransactionHeader.MerchantId replace "," with "",
+			//TransactionDate: transactionDetail.TransactionHeader.TransactionDate replace "," with "",
+			//CreditMerchantId: transactionDetail.TransactionHeader.CreditMerchantId replace "," with ""
+			//TransactionHeaderTable: "TransHeader"
+		},
+		TransactionTrailer: {
+			//TerminalId: transactionDetail.TransactionTrailer.TerminalId replace "," with "",
+			//CurrencyCode: transactionDetail.TransactionTrailer.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionTrailer.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionTrailer.Indicator,
+			TransactionTrailerValue: transactionDetail.TransactionTrailer.TransactionTrailerValue
+			//TransactionTime: transactionDetail.TransactionTrailer.TransactionTime replace "," with "",
+			//ClientId: transactionDetail.TransactionTrailer.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionTrailer.BatchNumber replace "," with "",
+			//MerchantId: transactionDetail.TransactionTrailer.MerchantId replace "," with "",
+			//TransactionDate: transactionDetail.TransactionTrailer.TransactionDate replace "," with "",
+			//CreditMerchantId: transactionDetail.TransactionTrailer.CreditMerchantId replace "," with ""
+			//TransactionTrailerTable: "TransTrailer"
+		},
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass2 ) -> {
+			MessageClass: messageClass2.MessageClass,
+			ShiftMark: messageClass2.ShiftMark,
+			TransactionNumber: messageClass2.TransactionNumber,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			ProductCode1: messageClass2.ProductCode1,
+			ProductValue1: messageClass2.ProductValue1,
+			ProductQuantity1: messageClass2.ProductQuantity1,
+			ProductCode2: messageClass2.ProductCode2,
+			ProductValue2: messageClass2.ProductValue2,
+			ProductQuantity2: messageClass2.ProductQuantity2,
+			ProductCode3: messageClass2.ProductCode3,
+			ProductValue3: messageClass2.ProductValue3,
+			ProductQuantity3: messageClass2.ProductQuantity3,
+			ProductCode4: messageClass2.ProductCode4,
+			ProductValue4: messageClass2.ProductValue4,
+			ProductQuantity4: messageClass2.ProductQuantity4			
+			//ProductInformation1: messageClass2.ProductInformation1,			
+			//ProductInformation2: messageClass2.ProductInformation2,			
+			//ProductQuantity: messageClass2.ProductQuantity
+			//MessageClass2Table: "MessageClass2"
+		},
+		MessageClass3: transactionDetail.MessageClass3 map ( messageClass3 , indexOfMessageClass3 ) -> {
+			TransactionNumber: messageClass3.TransactionNumber,
+			ShiftMark: messageClass3.ShiftMark,
+			VehicleRegistrationNumber: messageClass3.VehicleRegistrationNumber,
+			MessageClass: messageClass3.MessageClass,
+			KilometreMileage: messageClass3.KilometreMileage,
+			MessageType: messageClass3.MessageType
+			//MessageClass3Table: "MessageClass3"
+		}
+	}
+	//FileTrailer: payload.FileTrailer."End of a file"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="882721fe-5104-4db7-ab7c-5ce0321e123c" message=":FinalRequest:::#[payload]::::"/>
+			<!-- <db:select doc:name="SelectMaxFileId" doc:id="a80d3825-7210-475f-9411-ff9b778ebfbf" config-ref="RetailInterface_Database_Config" target="FieldId1" transactionalAction="NOT_SUPPORTED">
+			<db:sql><![CDATA[SELECT max(FileId) as test from OpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="maxId" doc:id="392c4326-8613-42c5-8281-a14a48469a49" message=":::AfterSelect))#[vars.FieldId1]:payload values:#[payload]:" />
+		<ee:transform doc:name="maxId" doc:id="cb32d4e1-dd5b-4ad6-bd5a-655042f5258e">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="maxId" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+vars.FieldId1[0] default 0]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform> -->
+			<!-- <raise-error doc:name="Raise error" doc:id="b27f02ef-7116-4073-93fc-d1c4698823d1" type="ANY"/> -->
+			<flow-ref doc:name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-ok" doc:id="eea23351-600b-41ba-a264-b77ff36d8069" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final" target="opayoPayloadInsertData"/>
+			<foreach doc:name="For Each" doc:id="e463a69b-d012-4b61-8029-ad7b7c037fc2" collection="#[payload.TransactionDetails]" counterVariableName="posCounter">
+				<ee:transform doc:name="Each Point Of Sale Payload" doc:id="634195bd-9f28-4976-9487-e42c48bc2681" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="eachPOSRecord" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="calling-db-insert-implementationFlow-OpayoSiteheader-ok" doc:id="aaf44c2c-68a0-4286-b734-51ddecdcd67c" name="test-poc-db-insertFlow-final" target="headerTransactionInserted"/>
+			</foreach>
+			<!-- <foreach doc:name="For Each" doc:id="389067ff-08ab-4d0b-bd6e-f1356d054bce" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="0e632a09-5e7c-44eb-bb1a-758f270df6a1" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
+			</foreach> -->
+			<!-- <foreach doc:name="For Each" doc:id="cc469cb1-09ae-41d6-b1d9-6c41816f2a84" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass3-insertFlow4-final" doc:id="86cc63ec-ff05-4824-8bab-4cc8d413534a" name="test-poc-db-messageclass3-insertFlow4-final" target="messageClass3InsertedData"/>
+			</foreach> -->
+			<async doc:name="Async" doc:id="0848aa3e-81a6-497c-89fd-f15163a232d9">
+				<flow-ref doc:name="callPayloadLoggerEndFlow" doc:id="cf33d1d7-1f34-4172-8800-944b9fead0b7" name="payloadLoggerEndFlow" />
+		</async> 
+			<logger level="INFO" doc:name="Logger" doc:id="3ee91715-f6ae-4125-8ff3-16e7840341dd" message="OrigianlPayload:#[vars.originallPayload]::::"/>
+			<ee:transform doc:name="setTargetFolder" doc:id="0b59b7a4-429c-4f84-bd63-b828c8a325bd" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.opayo.processed')]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f59a6bac-d23c-4b92-ae65-2993346ceec5" >
+					<ee:transform doc:name="setTargetFolder" doc:id="9de00915-52f9-41e5-b2e7-6f9751f9c6ba" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.opayo.error')]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="endLog" doc:id="50fae14a-a53f-4bf9-9ba5-01d6c79ec132" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "End of flow and data set to caller successfully"
+&#10;}]'/>
+		<error-handler ref="global-exceptionError_Handler" />
+	</flow>
+</mule>

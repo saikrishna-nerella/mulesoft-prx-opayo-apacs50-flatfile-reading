@@ -1,0 +1,1069 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="RetailInterface_Database_Config" doc:name="Database Config" doc:id="c6f3cc34-b16d-4a1e-9603-e1762a8592c3" >
+		<db:mssql-connection host="192.168.100.182" port="1433" user="OpayoIntegration" password="Stateoil2022!" databaseName="OpayoIntegration">
+			
+		</db:mssql-connection>
+	</db:config>
+	<flow name="test-poc-db-insertFlow" doc:id="e2ebeb3c-1aca-4eda-8fec-8eaa47ce668c" >
+		<logger level="INFO" doc:name="Logger" doc:id="4e033d72-dd7e-4f56-994b-8f5ed22e472d" message=":::"/>
+		<ee:transform doc:name="Transform Message" doc:id="baca8cb1-6dce-4980-be47-0281ce348c85" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	//FileHeader: {
+		//"Beginning of a file": payload.FileHeader."Beginning of a file"
+	//},
+	TransactionDetails: payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass4: transactionDetail.MessageClass4 map ( messageClass4 , indexOfMessageClass4 ) -> {
+			TransactionNumber: messageClass4.TransactionNumber,
+			AuthorisationCode: messageClass4.AuthorisationCode,
+			ShiftMark: messageClass4.ShiftMark,
+			TransactionTime: messageClass4.TransactionTime,
+			TransactionType: messageClass4.TransactionType,
+			MessageClass: messageClass4.MessageClass,
+			Amount: messageClass4.Amount,
+			CardIssueNumber: messageClass4.CardIssueNumber,
+			CardholderNumber: messageClass4.CardholderNumber,
+			DiscretionaryData1: messageClass4.DiscretionaryData1,
+			TerminalType: messageClass4.TerminalType,
+			CardExpiryDate: messageClass4.CardExpiryDate,
+			TransactionDate: messageClass4.TransactionDate,
+			ReservedUKCards1: messageClass4.ReservedUKCards1,
+			TransactionSource: messageClass4.TransactionSource,
+			CreatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy1: "MuleSoft"
+		},
+		TransactionHeader: {
+			//TerminalId: transactionDetail.TransactionHeader.TerminalId replace "," with "",
+			//CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionHeader.Indicator,
+			TransactionTrailerValue: transactionDetail.TransactionHeader.TransactionTrailerValue,
+			//TransactionTime: transactionDetail.TransactionHeader.TransactionTime replace "," with "",
+			//ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionHeader.BatchNumber replace "," with "",
+			//MerchantId: transactionDetail.TransactionHeader.MerchantId replace "," with "",
+			//TransactionDate: transactionDetail.TransactionHeader.TransactionDate replace "," with "",
+			//CreditMerchantId: transactionDetail.TransactionHeader.CreditMerchantId replace "," with "",
+			//TransactionHeaderTable: "TransHeader",
+			//CreatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy1: "MuleSoft"
+		},
+		TransactionTrailer: {
+			TerminalId: transactionDetail.TransactionTrailer.TerminalId replace "," with "",
+			CurrencyCode: transactionDetail.TransactionTrailer.CurrencyCode replace "," with "",
+			MerchantName: transactionDetail.TransactionTrailer.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionTrailer.Indicator replace "," with "",
+			TransactionTime: transactionDetail.TransactionTrailer.TransactionTime replace "," with "",
+			ClientId: transactionDetail.TransactionTrailer.ClientId replace "," with "",
+			BatchNumber: transactionDetail.TransactionTrailer.BatchNumber replace "," with "",
+			MerchantId: transactionDetail.TransactionTrailer.MerchantId replace "," with "",
+			TransactionDate: transactionDetail.TransactionTrailer.TransactionDate replace "," with "",
+			CreditMerchantId: transactionDetail.TransactionTrailer.CreditMerchantId replace "," with "",
+			TransactionTrailerTable: "TransTrailer",
+			CreatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy1: "MuleSoft"
+		},
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass2 ) -> {
+			//ProductCode: messageClass2.ProductCode,
+			TransactionNumber: messageClass2.TransactionNumber,
+			//ProductInformation3: messageClass2.ProductInformation3,
+			ShiftMark: messageClass2.ShiftMark,
+			///ProductValue: messageClass2.ProductValue,
+			//ProductInformation1: messageClass2.ProductInformation1,
+			MessageClass: messageClass2.MessageClass,
+			//ProductInformation2: messageClass2.ProductInformation2,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			//ProductQuantity: messageClass2.ProductQuantity,
+			ProductCode1: messageClass2.ProductCode1,
+			ProductValue1: messageClass2.ProductValue1,
+			ProductQuantity1: messageClass2.ProductQuantity1,
+			ProductCode2: messageClass2.ProductCode2,
+			ProductValue2: messageClass2.ProductValue2,
+			ProductQuantity2: messageClass2.ProductQuantity2,
+			ProductCode3: messageClass2.ProductCode3,
+			ProductValue3: messageClass2.ProductValue3,
+			ProductQuantity3: messageClass2.ProductQuantity3,
+			ProductCode4: messageClass2.ProductCode4,
+			ProductValue4: messageClass2.ProductValue4,
+			ProductQuantity4: messageClass2.ProductQuantity4,
+			MessageClass2Table: "MessageClass2",
+			CreatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy1: "MuleSoft"
+		},
+		MessageClass3: transactionDetail.MessageClass3 map ( messageClass3 , indexOfMessageClass3 ) -> {
+			TransactionNumber: messageClass3.TransactionNumber,
+			ShiftMark: messageClass3.ShiftMark,
+			VehicleRegistrationNumber: messageClass3.VehicleRegistrationNumber,
+			MessageClass: messageClass3.MessageClass,
+			KilometreMileage: messageClass3.KilometreMileage,
+			MessageType: messageClass3.MessageType,
+			MessageClass3Table: "MessageClass3",
+			CreatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDateTime1: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy1: "MuleSoft"
+		}
+	}
+	//FileTrailer: payload.FileTrailer."End of a file"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="CreatedOrUpdatedDateTime" ><![CDATA[%dw 2.0
+output text/plain
+---
+now() as String {format: 'yyyy-MM-dd HH:mm:ss'}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7896e12f-389e-47ba-a700-4a5b2f4e6a10" message=":AfterFileCheck(((((()))):#[payload]))))"/>
+		<db:select doc:name="Select1" doc:id="f2de188c-0aba-4d4c-bd7c-4b97a3c1642d" config-ref="RetailInterface_Database_Config" target="FieldId1">
+			<db:sql><![CDATA[SELECT max(FileId) as test from tblOpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger1" doc:id="a09300e1-4dea-46c5-9242-c55a2a9b9710" message=":::AfterSelect))#[vars.FieldId1]:payload values:#[payload]:" />
+		<ee:transform doc:name="Transform Message1" doc:id="f1604896-7d5f-469f-af77-ae48aec8e01c">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="maxId" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.FieldId1[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="243994d1-4c37-4a60-8282-21a7c2c4e8f6" message="(((((((((((((((#[vars.maxId]:::::" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="34b1d0d7-6e18-434e-9ebf-fcdbc07d9be2" >
+			<route >
+				
+				<flow-ref doc:name="db-tblOpayoPayloadInfo-insertFlow" doc:id="8747ac2a-a689-41d1-9b66-02c076013110" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1"/>
+			</route>
+			<route >
+				
+				<flow-ref doc:name="db-headertransaction-insertFlow1" doc:id="25388329-1de9-460b-a5da-3d8af338a72e" name="test-poc-db-headertransaction-insertFlowtest2-selectmax"/>
+			</route>
+			<!-- <route>
+			<flow-ref doc:name="Flow Reference" doc:id="d6511eb1-2549-4195-9cbf-cf789bfe467f" name="test-poc-db-trailertransaction-insertFlow3"/>
+			</route> -->
+			 <route >
+				<flow-ref doc:name="db-trailertransaction-insertFlow2" doc:id="eaf7496a-6d9b-4765-9633-e5284b216b4f" name="test-poc-db-trailertransaction-insertFlow2-selectmax"/>
+			</route>
+			 <route >
+				<flow-ref doc:name="db-messageclass4-insertFlow3" doc:id="2d4ec132-e72c-4cc2-a53b-92e645468c48" name="test-poc-db-messageclass4-insertFlow3-UpsertFlow"/>
+			</route> 
+			 <route >
+				<flow-ref doc:name="test-poc-db-messageclass3-insertFlow4" doc:id="317e3722-451f-48e0-87df-e2ec21a90fee" name="test-poc-db-messageclass3-insertFlow4-UpsertFlow"/>
+			</route>
+			<route > 
+				<flow-ref doc:name="test-poc-db-messageclass2-insertFlow5" doc:id="64bc5f42-6cf7-49ad-bb60-7479c2d4fbea" name="test-poc-db-messageclass2-insertFlow5-new-productdetails-insert-operation"/>
+			</route> 
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="8132f0e4-0feb-41fd-b1cb-abae0987a208" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6fbd582e-a3a7-46d7-a96c-7e27e1686b7b" message=":After Scatter Gather Payload: #[payload]:::"/>
+	</flow>
+	<flow name="test-poc-db-tblOpayoPayloadInfo-insertFlow1" doc:id="dbaafe88-36ce-4bdf-9082-acbe8233bf7a" >
+		 <ee:transform doc:name="Transform Message" doc:id="1d57cb34-95e9-41eb-86bd-f585165bcd26" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	//payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		
+		
+			//TerminalId: transactionDetail.TransactionHeader.TerminalId ,
+			//CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			//MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			//Indicator: transactionDetail.TransactionHeader.Indicator replace "," with "",
+			//TransactionTime: transactionDetail.TransactionHeader.TransactionTime ,
+			//ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			//BatchNumber: transactionDetail.TransactionHeader.BatchNumber ,
+			//MerchantId: transactionDetail.TransactionHeader.MerchantId ,
+			//TransactionDate: transactionDetail.TransactionHeader.TransactionDate ,
+			FileID: "test",
+			FileName: vars.dataEntityValue,
+			TransactionDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			Status: 1,
+			ErrorMessage: "Data Inserted into Opayo Integration DB"
+			//TransactionHeaderTable: "TransHeader",
+			//CreatedDateTime2: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//UpdatedDateTime2: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//CreatedOrUpdatedBy2: "MuleSoft"
+			//CreatedDateTime2: "",
+			//UpdatedDateTime2: "",
+			//CreatedOrUpdatedBy2: ""
+		
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> 
+		<ee:transform doc:name="Transform Message" doc:id="6956490f-cafc-410a-a207-b196ec229659" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[payload]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3fd9bac9-c4f0-4d90-a744-fb19e605cc25" message=":HeaderTransactionInsertion Data: #[payload]:::"/>
+		<db:bulk-insert doc:name="tblOpayoPayloadInfo insert" doc:id="1055d858-12a9-44d3-81f2-8224b35c74fa" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO tblOpayoPayloadInfo (FileName, TransactionDate, Status, ErrorMessage) values (:FileName, :TransactionDate, :Status, :ErrorMessage)]]></db:sql>
+		</db:bulk-insert>
+		<set-variable value="2" doc:name="Set Variable" doc:id="b844c4e2-985e-4cf9-80c1-5b9b6e52239a" variableName="maxId"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a548d393-708b-428d-8977-b2f8f1995c7f" message=":After HeaderTransaction BulkInsert::#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-headertransaction-insertFlow1" doc:id="1be964d4-b9ad-40fb-ac81-7e3be39ee942" >
+		<ee:transform doc:name="Transform Message" doc:id="3ed64f62-3297-495c-8138-d65183979e23" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		
+		
+			//FileID: 1,
+			TransactionHeaderID: 2,
+			TerminalId: transactionDetail.TransactionHeader.TerminalId ,
+			CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionHeader.Indicator replace "," with "",
+			Time: transactionDetail.TransactionHeader.TransactionTime ,
+			ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			BatchNumber: transactionDetail.TransactionHeader.BatchNumber ,
+			MerchantId: transactionDetail.TransactionHeader.MerchantId ,
+			Date: transactionDetail.TransactionHeader.Date ,
+			CreditMerchantId: transactionDetail.TransactionHeader.CreditMerchantId,
+			//TransactionHeaderTable: "TransHeader",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy2: "MuleSoft"
+			//CreatedDateTime2: "",
+			//UpdatedDateTime2: "",
+			//CreatedOrUpdatedBy2: ""
+		
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> 
+		<ee:transform doc:name="Transform Message" doc:id="8d92d374-4464-4853-a7a8-91ed7a4b43a1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="26a34875-ea10-4fb3-9a4b-a204f833d824" message=":HeaderTransactionInsertion Data: #[payload]:::  "/>
+		<db:select doc:name="Select" doc:id="7b8bcb19-d740-4665-988b-d6d0272653d5" config-ref="RetailInterface_Database_Config" target="FieldId">
+			<db:sql ><![CDATA[SELECT max(FileId) as test from tblOpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="683a56a5-db62-4570-949c-20c9fe578e1e" message=":::AfterSelect))0#[vars.FieldId]:payload values:#[payload]:"/>
+		<ee:transform doc:name="Transform Message" doc:id="9c1ba684-8487-48a2-a0dc-16953b743471" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="test1" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.FieldId[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9b975d03-37e7-4548-b1ec-913107212851" message=":Main(()):#[vars.test1.test]:"/>
+		<db:bulk-insert doc:name="HeaderTransaction Bulk insert" doc:id="ffdc6591-a419-4be3-a6ed-3ed5e043d3c1" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO tblTransactionHeader (FileID,TransactionHeaderID,TerminalId, CurrencyCode, MerchantName, Indicator, Time, ClientId, BatchNumber, MerchantId, Date, CreditMerchantId,  CreatedDate, UpdatedDate) values (#[vars.test1.test], :TransactionHeaderID, :TerminalId, :CurrencyCode, :MerchantName, :Indicator, :Time, :ClientId, :BatchNumber, :MerchantId, :Date, :CreditMerchantId, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="dac89532-021c-4b15-8196-6c3011b05155" message=":After HeaderTransaction BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-headertransaction-insertFlowtest2-selectmax" doc:id="81ef41e9-0d31-437d-b23a-9c21d4a2f65f" >
+		 <db:select doc:name="Select1" doc:id="16da2865-2664-4a33-8609-2b44e89f1c11" config-ref="RetailInterface_Database_Config" target="FieldId">
+			<db:sql><![CDATA[SELECT max(FileId) as test from tblOpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger1" doc:id="18d613ee-d897-4772-9c4b-f006f32e3f91" message=":::AfterSelect))0#[vars.FieldId]:payload values:#[payload]:" />
+		<ee:transform doc:name="Transform Message1" doc:id="f6160c79-0671-4701-9438-3d8dfda3e8fd">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="test1"><![CDATA[%dw 2.0
+output application/json
+---
+vars.FieldId[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="dacf0730-0562-4b87-8451-02285a7a84ab" message=":Main(()):#[vars.test1.test]:(((((((((((((((:::::" />
+		<ee:transform doc:name="Transform Message" doc:id="4080d0d7-5138-4415-aa5e-31155d741b7f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var a = 2
+var a1 = vars.test1.test
+---
+
+	
+	payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		
+		FileID: vars.maxId.test default 1,
+			//FileID: vars.test1.test default 1,
+			//FileID: (a1 + 1) ,
+			TransactionHeaderID: 2,
+			TerminalId: transactionDetail.TransactionHeader.TerminalId ,
+			CurrencyCode: transactionDetail.TransactionHeader.CurrencyCode replace "," with "",
+			MerchantName: transactionDetail.TransactionHeader.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionHeader.Indicator replace "," with "",
+			Time: transactionDetail.TransactionHeader.TransactionTime ,
+			ClientId: transactionDetail.TransactionHeader.ClientId replace "," with "",
+			BatchNumber: transactionDetail.TransactionHeader.BatchNumber ,
+			MerchantId: transactionDetail.TransactionHeader.MerchantId ,
+			Date: transactionDetail.TransactionHeader.Date ,
+			CreditMerchantId: transactionDetail.TransactionHeader.CreditMerchantId,
+			//TransactionHeaderTable: "TransHeader",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy2: "MuleSoft"
+			//CreatedDateTime2: "",
+			//UpdatedDateTime2: "",
+			//CreatedOrUpdatedBy2: ""
+		
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> 
+		<ee:transform doc:name="Transform Message" doc:id="7befad08-dcb1-4694-ab39-9f79bfacd157" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b9b37d01-9dbe-4b00-9a15-2db1876c86ae" message=":HeaderTransactionInsertion Data: #[payload]:::"/>
+		<db:bulk-insert doc:name="HeaderTransaction Bulk insert" doc:id="1b635a55-4ba5-4ca0-8bc7-891ac80d70dd" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO tblTransactionHeader (FileID,TransactionHeaderID,TerminalId, CurrencyCode, MerchantName, Indicator, Time, ClientId, BatchNumber, MerchantId, Date, CreditMerchantId,  CreatedDate, UpdatedDate) values (:FileID + 1, :TransactionHeaderID, :TerminalId, :CurrencyCode, :MerchantName, :Indicator, :Time, :ClientId, :BatchNumber, :MerchantId, :Date, :CreditMerchantId, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="f8c017c0-06a6-4a1a-bbda-7f0622d65aee" message=":After HeaderTransaction BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-trailertransaction-insertFlow2" doc:id="a2a4ae85-ec07-4c55-9974-c86ca734df5f" >
+		<ee:transform doc:name="Transform Message" doc:id="a2e11b5c-8d87-4b5d-bd2b-c4e8d87182f2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	 payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		
+		
+			FileID: 1,
+			TransactionHeaderID: 2,
+			TerminalId: transactionDetail.TransactionTrailer.TerminalId ,
+			CurrencyCode: transactionDetail.TransactionTrailer.CurrencyCode replace "," with "",
+			MerchantName: transactionDetail.TransactionTrailer.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionTrailer.Indicator replace "," with "",
+			Time: transactionDetail.TransactionTrailer.TransactionTime ,
+			ClientId: transactionDetail.TransactionTrailer.ClientId replace "," with "",
+			BatchNumber: transactionDetail.TransactionTrailer.BatchNumber ,
+			MerchantId: transactionDetail.TransactionTrailer.MerchantId ,
+			Date: transactionDetail.TransactionTrailer.TransactionDate ,
+			CreditMerchantId: transactionDetail.TransactionTrailer.CreditMerchantId ,
+			//TransactionTrailerTable: "TransTrailer",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//CreatedDateTime3: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//UpdatedDateTime3: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy3: "MuleSoft"
+			//CreatedDateTime3:"",
+			//UpdatedDateTime3: "",
+			//CreatedOrUpdatedBy3: ""
+		}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2d10a66e-184f-4be6-8cbe-9561aff65340" message=":TrailerTransactionInsertion Data: #[payload]:::"/>
+		 <db:bulk-insert doc:name="TrailerTransaction Bulk Insert" doc:id="b89eaa22-dc4d-4409-bd5e-b021ea5de6bc" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO tblTransactionTrailer (FileID,TransactionHeaderID,TerminalId, CurrencyCode, MerchantName, Indicator, Time, ClientId, BatchNumber, MerchantId, Date, CreditMerchantId,  CreatedDate, UpdatedDate) values (:FileID, :TransactionHeaderID, :TerminalId, :CurrencyCode, :MerchantName, :Indicator, :Time, :ClientId, :BatchNumber, :MerchantId, :Date, :CreditMerchantId, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="b0294792-731e-4aef-ac8d-ec6c839c6cf7" message=":After TrailerTransaction BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-trailertransaction-insertFlow2-selectmax" doc:id="7972804d-b41f-46a0-8cd6-1a3104f05f1d" >
+		<db:select doc:name="Select1" doc:id="398f5785-0d42-4742-8c32-984982fc2b15" config-ref="RetailInterface_Database_Config" target="FieldId">
+			<db:sql><![CDATA[SELECT max(FileId) as test from tblOpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message1" doc:id="955bfdd3-7eb9-4a59-ba0a-f909b3e98d31">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="test1"><![CDATA[%dw 2.0
+output application/json
+---
+vars.FieldId[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="336deae4-01ee-4475-a874-ebc9b096625c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	 payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		
+			FileID: vars.maxId.test default 1,
+			//FileID: vars.test1.test default 1,
+			TransactionHeaderID: 2,
+			TerminalId: transactionDetail.TransactionTrailer.TerminalId ,
+			CurrencyCode: transactionDetail.TransactionTrailer.CurrencyCode replace "," with "",
+			MerchantName: transactionDetail.TransactionTrailer.MerchantName replace "," with "",
+			Indicator: transactionDetail.TransactionTrailer.Indicator replace "," with "",
+			Time: transactionDetail.TransactionTrailer.TransactionTime ,
+			ClientId: transactionDetail.TransactionTrailer.ClientId replace "," with "",
+			BatchNumber: transactionDetail.TransactionTrailer.BatchNumber ,
+			MerchantId: transactionDetail.TransactionTrailer.MerchantId ,
+			Date: transactionDetail.TransactionTrailer.TransactionDate ,
+			CreditMerchantId: transactionDetail.TransactionTrailer.CreditMerchantId ,
+			//TransactionTrailerTable: "TransTrailer",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//CreatedDateTime3: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			//UpdatedDateTime3: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy3: "MuleSoft"
+			//CreatedDateTime3:"",
+			//UpdatedDateTime3: "",
+			//CreatedOrUpdatedBy3: ""
+		}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="376c8baf-0000-4f31-b2cc-5e67a7b0604d" message=":TrailerTransactionInsertion Data: #[payload]:::"/>
+		 <db:bulk-insert doc:name="TrailerTransaction Bulk Insert" doc:id="a2e44d73-9aa8-4a17-aea7-2a258a0a39a4" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO tblTransactionTrailer (FileID,TransactionHeaderID,TerminalId, CurrencyCode, MerchantName, Indicator, Time, ClientId, BatchNumber, MerchantId, Date, CreditMerchantId,  CreatedDate, UpdatedDate) values (:FileID + 1, :TransactionHeaderID, :TerminalId, :CurrencyCode, :MerchantName, :Indicator, :Time, :ClientId, :BatchNumber, :MerchantId, :Date, :CreditMerchantId, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="2074be5c-4354-4123-8b50-2aac0160a3f2" message=":After TrailerTransaction BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass4-insertFlow3" doc:id="c8996659-47d5-4534-9d3e-2375f9e249b3" >
+		<ee:transform doc:name="Transform Message" doc:id="157d9ae4-4c7d-4a13-9050-609d82b4b5f5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass4: transactionDetail.MessageClass4 map ( messageClass4 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass4.TransactionNumber,
+			ReservedUKCards2: "",
+			AuthorisationMethod: "",
+			DiscretionaryData2: "",
+			TransactionNumber: messageClass4.TransactionNumber,
+			AuthorisationCode: messageClass4.AuthorisationCode,
+			ShiftMark: messageClass4.ShiftMark,
+			TransactionTime: messageClass4.TransactionTime,
+			TransactionType: messageClass4.TransactionType,
+			MessageClass: messageClass4.MessageClass,
+			Amount: messageClass4.Amount,
+			CardIssueNumber: messageClass4.CardIssueNumber,
+			CardholderNumber: messageClass4.CardholderNumber,
+			//CardholderNumber: 4565,
+			DiscretionaryData1: messageClass4.DiscretionaryData1,
+			TerminalType: messageClass4.TerminalType,
+			CardExpiryDate: messageClass4.CardExpiryDate,
+			TransactionDate: messageClass4.TransactionDate,
+			ReservedUKCards1: messageClass4.ReservedUKCards1,
+			TransactionSource: messageClass4.TransactionSource,
+			//MessageClass4Table: "MessageClass4",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy4: "MuleSoft"
+			//CreatedDateTime4: "",
+			//UpdatedDateTime4: "",
+			//CreatedOrUpdatedBy4: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bfffe40e-e5a3-4b1e-bce3-b50e1f4234f3" message=":MessageClass4 TransactionInsertion Data: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="d1d5eaaa-66b4-49e4-9cb9-64c235b7907f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5eafc5d3-50cf-48f1-b762-d9e35752e813" message=":FirstLog:#[payload]:"/>
+		<ee:transform doc:name="Transform Message" doc:id="07afeaf4-2697-4e39-ae64-fe27c654b564" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass4))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6bf48263-4da4-4034-872f-fe21a720109b" message=":SecondLog: #[payload]:"/>
+		<db:bulk-insert doc:name="MessageClass4 Bulk insert" doc:id="9fb4558b-10e4-4638-b91e-52427ae60cca" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO [tblCardDetail-M4] (TransactionHeaderID, ReservedUKCards2, AuthorisationMethod, DiscretionaryData2, TransactionNumber, AuthorisationCode, ShiftMark, TransactionTime, TransactionType, Amount, CardIssueNumber, CardholderNumber, DiscretionaryData1, TerminalType, CardExpiryDate, TransactionDate, ReservedUKCards1, TransactionSource, CreatedDate, UpdatedDate) values (:TransactionHeaderID, :ReservedUKCards2, :AuthorisationMethod, :DiscretionaryData2, :TransactionNumber, :AuthorisationCode, :ShiftMark, :TransactionTime, :TransactionType, :Amount, :CardIssueNumber, :CardholderNumber, :DiscretionaryData1, :TerminalType, :CardExpiryDate, :TransactionDate, :ReservedUKCards1, :TransactionSource, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert> 
+		<ee:transform doc:name="Transform Message" doc:id="f27dd681-5be0-4c1f-9acb-ec2320207429" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="977aff69-6c9f-4dd5-bfaa-2bc711345c01" message=":After MessageClass4 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass4-insertFlow3-UpsertFlow" doc:id="b1e7939a-bf19-4c16-9e6c-64c5498da9f8" >
+		<ee:transform doc:name="Transform Message" doc:id="7bcf288d-f871-4b22-a3ff-3980ee9370ec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass4: transactionDetail.MessageClass4 map ( messageClass4 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass4.TransactionNumber,
+			ReservedUKCards2: "",
+			AuthorisationMethod: "",
+			DiscretionaryData2: "",
+			TransactionNumber: messageClass4.TransactionNumber,
+			AuthorisationCode: messageClass4.AuthorisationCode,
+			ShiftMark: messageClass4.ShiftMark,
+			TransactionTime: messageClass4.TransactionTime,
+			TransactionType: messageClass4.TransactionType,
+			MessageClass: messageClass4.MessageClass,
+			Amount: messageClass4.Amount,
+			CardIssueNumber: messageClass4.CardIssueNumber,
+			CardholderNumber: messageClass4.CardholderNumber,
+			//CardholderNumber: 4565,
+			DiscretionaryData1: messageClass4.DiscretionaryData1,
+			TerminalType: messageClass4.TerminalType,
+			CardExpiryDate: messageClass4.CardExpiryDate,
+			TransactionDate: messageClass4.TransactionDate,
+			ReservedUKCards1: messageClass4.ReservedUKCards1,
+			TransactionSource: messageClass4.TransactionSource,
+			//MessageClass4Table: "MessageClass4",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy4: "MuleSoft"
+			//CreatedDateTime4: "",
+			//UpdatedDateTime4: "",
+			//CreatedOrUpdatedBy4: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4743d05e-c1c2-493d-860a-db4e4bcfb43a" message=":MessageClass4 TransactionInsertion Data upsertM Messagseclass4: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="45c95820-2071-48f9-aed6-c65368afdec5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="54e8b057-8542-4319-a183-42c0cd76cc5b" message=":FirstLog:#[payload]:"/>
+		<ee:transform doc:name="Transform Message" doc:id="81e15c93-140a-4d4a-b9fe-0b74e6297d89" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass4))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="df499b76-2a63-4616-ba64-4ae3769fafbd" message=":SecondLog: #[payload]:"/>
+		<db:bulk-update doc:name="Bulk update" doc:id="c8df5147-054c-4bc6-9dfa-749d6accbe93" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblCardDetail-M4] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].ReservedUKCards2=:ReservedUKCards2, [Target].AuthorisationMethod=:AuthorisationMethod, [Target].DiscretionaryData2=:DiscretionaryData2, [Target].TransactionNumber=:TransactionNumber, [Target].AuthorisationCode=:AuthorisationCode, [Target].ShiftMark=:ShiftMark, [Target].TransactionTime=:TransactionTime, [Target].TransactionType=:TransactionType, [Target].Amount=:Amount, [Target].CardIssueNumber=:CardIssueNumber, [Target].CardholderNumber=:CardholderNumber, [Target].DiscretionaryData1=:DiscretionaryData1, [Target].TerminalType=:TerminalType, [Target].CardExpiryDate=:CardExpiryDate, [Target].TransactionDate=:TransactionDate, [Target].ReservedUKCards1=:ReservedUKCards1, [Target].TransactionSource=:TransactionSource, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, ReservedUKCards2, AuthorisationMethod, DiscretionaryData2, TransactionNumber, AuthorisationCode, ShiftMark, TransactionTime, TransactionType, Amount, CardIssueNumber, CardholderNumber, DiscretionaryData1, TerminalType, CardExpiryDate, TransactionDate, ReservedUKCards1, TransactionSource, CreatedDate, UpdatedDate)
+VALUES ( :TransactionHeaderID, :ReservedUKCards2, :AuthorisationMethod, :DiscretionaryData2, :TransactionNumber, :AuthorisationCode, :ShiftMark, :TransactionTime, :TransactionType, :Amount, :CardIssueNumber, :CardholderNumber, :DiscretionaryData1, :TerminalType, :CardExpiryDate, :TransactionDate, :ReservedUKCards1, :TransactionSource, :CreatedDate, :UpdatedDate );]]></db:sql>
+		</db:bulk-update>
+		<!-- <db:bulk-insert doc:name="MessageClass4 Bulk insert" doc:id="e1916d22-7ade-4ef5-9de3-d5ed5d61fc33" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblCardDetail-M4] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].ReservedUKCards2=:ReservedUKCards2, [Target].AuthorisationMethod=:AuthorisationMethod, [Target].DiscretionaryData2=:DiscretionaryData2, [Target].TransactionNumber=:TransactionNumber, [Target].AuthorisationCode=:AuthorisationCode, [Target].ShiftMark=:ShiftMark, [Target].TransactionTime=:TransactionTime, [Target].TransactionType=:TransactionType, [Target].Amount=:Amount, [Target].CardIssueNumber=:CardIssueNumber, [Target].CardholderNumber=:CardholderNumber, [Target].DiscretionaryData1=:DiscretionaryData1, [Target].TerminalType=:TerminalType, [Target].CardExpiryDate=:CardExpiryDate, [Target].TransactionDate=:TransactionDate, [Target].ReservedUKCards1=:ReservedUKCards1, [Target].TransactionSource=:TransactionSource [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, ReservedUKCards2, AuthorisationMethod, DiscretionaryData2, TransactionNumber, AuthorisationCode, ShiftMark, TransactionTime, TransactionType, Amount, CardIssueNumber, CardholderNumber, DiscretionaryData1, TerminalType, CardExpiryDate, TransactionDate, ReservedUKCards1, TransactionSource, CreatedDate, UpdatedDate)
+VALUES ( :TransactionHeaderID, :ReservedUKCards2, :AuthorisationMethod, :DiscretionaryData2, :TransactionNumber, :AuthorisationCode, :ShiftMark, :TransactionTime, :TransactionType, :Amount, :CardIssueNumber, :CardholderNumber, :DiscretionaryData1, :TerminalType, :CardExpiryDate, :TransactionDate, :ReservedUKCards1, :TransactionSource, :CreatedDate, :UpdatedDate );]]></db:sql>
+		</db:bulk-insert>  -->
+		<ee:transform doc:name="Transform Message" doc:id="b5243476-e1a1-44b0-a37c-0d22f9fe9b64" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c15a61d8-aaee-4479-8cdc-cf37bb49a5d1" message=":After MessageClass4 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass3-insertFlow4" doc:id="e590884c-221d-434b-a4e7-95051c97e9ec" >
+		<logger level="INFO" doc:name="Logger" doc:id="7c30f6a5-8aea-4245-8721-c898ab629531" message=":MessageClass3-BeforeDW:#[payload]:"/>
+		<ee:transform doc:name="Transform Message" doc:id="fbc4a7e9-b5c8-44f9-b596-2de69bbd603c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass3: transactionDetail.MessageClass3 map ( messageClass3 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass3.TransactionNumber,
+			Reserved: "",
+			TransactionNumber: messageClass3.TransactionNumber,
+			ShiftMark: messageClass3.ShiftMark,
+			VehicleRegistrationNumber: messageClass3.VehicleRegistrationNumber,
+			MessageClass: messageClass3.MessageClass,
+			KilometreMileage: messageClass3.KilometreMileage,
+			MessageType: messageClass3.MessageType,
+			MessageClass3Table: "MessageClass3",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy5: "MuleSoft"
+			//CreatedDateTime5: "",
+			//UpdatedDateTime5: "",
+			//CreatedOrUpdatedBy5: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="110d4da7-da44-46d7-a878-ff33e6107343" message=":MessageClass3 TransactionInsertion Data normal flow calling: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="aba22b15-b551-4208-a39d-ec06812c70c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="2fdbe530-9f1d-4a25-b652-cc7434f61e21" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass3))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="MessageClass3 Bulk insert" doc:id="b9952042-0d16-4087-b871-f538e0c3e6fe" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO [tblVehicleDetail-M3] (TransactionHeaderID, Reserved, TransactionNumber, ShiftMark, VehicleRegistrationNumber, KilometreMileage, MessageType, CreatedDate, UpdatedDate) values (:TransactionHeaderID, :Reserved, :TransactionNumber, :ShiftMark, :VehicleRegistrationNumber, :KilometreMileage, :MessageType, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert> 
+		<logger level="INFO" doc:name="Logger" doc:id="0a9a21cb-9281-4335-97aa-82e38c6b7b23" message=":After MessageClass3 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass3-insertFlow4-UpsertFlow" doc:id="c090040f-bc3b-4156-babd-c4944c1f8539" >
+		<ee:transform doc:name="Transform Message" doc:id="3de283d0-539f-4154-b1f6-e117ff94e17e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass3: transactionDetail.MessageClass3 map ( messageClass3 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass3.TransactionNumber,
+			Reserved: "eee",
+			TransactionNumber: messageClass3.TransactionNumber,
+			ShiftMark: messageClass3.ShiftMark,
+			VehicleRegistrationNumber: messageClass3.VehicleRegistrationNumber,
+			MessageClass: messageClass3.MessageClass,
+			KilometreMileage: messageClass3.KilometreMileage,
+			MessageType: messageClass3.MessageType,
+			MessageClass3Table: "MessageClass3",
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy5: "MuleSoft"
+			//CreatedDateTime5: "",
+			//UpdatedDateTime5: "",
+			//CreatedOrUpdatedBy5: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3203a0a1-35f7-401c-80c6-5fef034e4272" message=":MessageClass3 TransactionInsertion Data upsertM Messagseclass3: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="4f21db04-2060-4d49-91a7-c2693e2dcc90" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="e21501f3-750f-4dcc-85be-0df2ffc7fb34" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass3))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="68568173-a0de-47be-ad40-86fff47c9370" message="((((((((((((((((((((Final)))))):#[payload]:"/>
+		<db:bulk-update doc:name="Bulk update" doc:id="7f7e4f24-3ba2-49d7-8652-f2e371ae2135" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblVehicleDetail-M3] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].Reserved=:Reserved, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].VehicleRegistrationNumber=:VehicleRegistrationNumber, [Target].KilometreMileage=:KilometreMileage, [Target].MessageType=:MessageType, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, Reserved, TransactionNumber, ShiftMark, VehicleRegistrationNumber, KilometreMileage, MessageType, CreatedDate, UpdatedDate)
+VALUES (:TransactionHeaderID, :Reserved, :TransactionNumber, :ShiftMark, :VehicleRegistrationNumber, :KilometreMileage, :MessageType, :CreatedDate, :UpdatedDate);]]></db:sql>
+		</db:bulk-update>
+		<!-- <db:bulk-insert doc:name="MessageClass3 Bulk insert" doc:id="9013d089-2594-479c-b3a2-d7957269753e" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblVehicleDetail-M3] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].Reserved=:Reserved, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, Reserved, CreatedDate, UpdatedDate)
+VALUES (:TransactionHeaderID, :Reserved, :CreatedDate, :UpdatedDate);]]></db:sql>
+		</db:bulk-insert>  -->
+		<logger level="INFO" doc:name="Logger" doc:id="39bcdff8-7438-4c4a-b59d-b4d7357cea7e" message=":After MessageClass3 BulkInsert::#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass2-insertFlow5" doc:id="e8a19da6-e427-43a6-bada-2f393174a8a7" >
+		<ee:transform doc:name="Transform Message" doc:id="0667af5f-99c3-4e79-8b90-85ae6f0cc5f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass2.TransactionNumber,
+			ProductCode: messageClass2.ProductCode,
+			TransactionNumber: messageClass2.TransactionNumber,
+			ProductInformation3: messageClass2.ProductInformation3,
+			ShiftMark: messageClass2.ShiftMark,
+			ProductValue: messageClass2.ProductValue,
+			ProductInformation1: messageClass2.ProductInformation1,
+			MessageClass: messageClass2.MessageClass,
+			ProductInformation2: messageClass2.ProductInformation2,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			ProductQuantity: messageClass2.ProductQuantity,
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy6: "MuleSoft"
+			//CreatedDateTime6: "",
+			//UpdatedDateTime6: "",
+			//CreatedOrUpdatedBy6: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="77394de3-c3fb-448b-8e21-d7eeef70e6df" message=":MessageClass2 TransactionInsertion Data: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="bde0e454-c5ad-45b9-92a3-09a3c692bcf1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a9f5b549-1c37-4424-8971-19895709ace6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass2))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="MessageClass2 Bulk insert" doc:id="82d174d1-cc00-4198-bae0-d9aa1f89e7f5" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate) values (:TransactionHeaderID, :ProductCode, :TransactionNumber, :ShiftMark, :ProductValue, :AuxiliaryMesasgeNumber, :ProductQuantity, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert> 
+		<logger level="INFO" doc:name="Logger" doc:id="967d2bba-d53f-4897-9dc4-06722915ad50" message=":After MessageClass2 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass2-insertFlow5-Upsert-operation" doc:id="6bf039ca-766d-4e7c-8598-550e6be7ef29" >
+		<ee:transform doc:name="Transform Message" doc:id="d139a282-d340-42ee-9e64-048665f48501" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass2.TransactionNumber,
+			//ProductCode: messageClass2.ProductCode,
+			TransactionNumber: messageClass2.TransactionNumber,
+			//ProductInformation3: messageClass2.ProductInformation3,
+			ShiftMark: messageClass2.ShiftMark,
+			//ProductValue: messageClass2.ProductValue,
+			//ProductInformation1: messageClass2.ProductInformation1,
+			MessageClass: messageClass2.MessageClass,
+			//ProductInformation2: messageClass2.ProductInformation2,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			//ProductQuantity: messageClass2.ProductQuantity,
+			ProductCode1: messageClass2.ProductCode1,
+			ProductValue1: messageClass2.ProductValue1,
+			ProductQuantity1: messageClass2.ProductQuantity1,
+			ProductCode2: messageClass2.ProductCode2,
+			ProductValue2: messageClass2.ProductValue2,
+			ProductQuantity2: messageClass2.ProductQuantity2,
+			ProductCode3: messageClass2.ProductCode3,
+			ProductValue3: messageClass2.ProductValue3,
+			ProductQuantity3: messageClass2.ProductQuantity3,
+			ProductCode4: messageClass2.ProductCode4,
+			ProductValue4: messageClass2.ProductValue4,
+			ProductQuantity4: messageClass2.ProductQuantity4,
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy6: "MuleSoft"
+			//CreatedDateTime6: "",
+			//UpdatedDateTime6: "",
+			//CreatedOrUpdatedBy6: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="703bd54e-bfab-4bdb-ae99-8cbc41a601ee" message=":MessageClass2 TransactionInsertion Data22 upsertM Messagseclass2: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="3d71030d-f250-4b7c-bab5-1347fbd6f5ab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="15678044-e6bd-4118-89a7-3b97541ec1f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass2))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<!-- <db:update doc:name="Update" doc:id="afb163f8-1c70-410e-95bb-f9225ff1eb91" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].ProductCode=:ProductCode, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].ProductValue=:ProductValue, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductQuantity=:ProductQuantity, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate,  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate)
+VALUES ( :TransactionHeaderID, :ProductCode, :TransactionNumber, :ShiftMark, :ProductValue, :AuxiliaryMesasgeNumber, :ProductQuantity, :CreatedDate, :UpdatedDate );]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:update> -->
+		<!-- <db:bulk-insert doc:name="MessageClass2 Bulk insert" doc:id="82a56479-24d4-49a1-980a-7995ded63f37" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate) values (:TransactionHeaderID, :ProductCode, :TransactionNumber, :ShiftMark, :ProductValue, :AuxiliaryMesasgeNumber, :ProductQuantity, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert> --> 
+		 <scatter-gather doc:name="Scatter-Gather" doc:id="528b54f0-7374-4bba-b8b6-62e0f0d1a565" >
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="6fb38a9d-c47a-43f9-9480-3d4d088cc90b" message=":::BeforeProduct1 update : #[payload]:"/>
+				<db:bulk-update doc:name="Bulk update Product1" doc:id="d49cff01-c7fa-4c5f-ba3f-4aad6d3f5230" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductCode=:ProductCode1, [Target].ProductValue=:ProductValue1, [Target].ProductQuantity=:ProductQuantity1, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate, [Target].MessageClass=:MessageClass  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, TransactionNumber, ShiftMark, AuxiliaryMesasgeNumber, ProductCode, ProductValue, ProductQuantity, CreatedDate, UpdatedDate, MessageClass)
+VALUES ( :TransactionHeaderID, :TransactionNumber, :ShiftMark, :AuxiliaryMesasgeNumber, :ProductCode1, :ProductValue1, :ProductQuantity1, :CreatedDate, :UpdatedDate, :MessageClass );]]></db:sql>
+		</db:bulk-update>
+				<logger level="INFO" doc:name="Logger" doc:id="300761bd-a4cf-4961-8287-7b7f43819ef0" message=":::After Product1 update : #[payload]:"/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="5ab91a8f-d2d0-4902-aafc-b8dec17e49f8" message=":::BeforeProduct2 update : #[payload]:"/>
+				<db:bulk-update doc:name="Bulk update Product2" doc:id="65575ac9-94e1-493b-956e-29c999506530" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductCode=:ProductCode2, [Target].ProductValue=:ProductValue2, [Target].ProductQuantity=:ProductQuantity2, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate, [Target].MessageClass=:MessageClass  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, TransactionNumber, ShiftMark, AuxiliaryMesasgeNumber, ProductCode, ProductValue, ProductQuantity, CreatedDate, UpdatedDate, MessageClass)
+VALUES ( :TransactionHeaderID, :TransactionNumber, :ShiftMark, :AuxiliaryMesasgeNumber, :ProductCode2, :ProductValue2, :ProductQuantity2, :CreatedDate, :UpdatedDate, :MessageClass );]]></db:sql>
+		</db:bulk-update>
+				<logger level="INFO" doc:name="Logger" doc:id="3bad4b92-f0af-43f6-84a9-d6fae4005112" message=":::After Product2 update : #[payload]:"/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="be6def61-4643-4b3d-8723-78a72bf2e07d" message=":::BeforeProduct3 update : #[payload]:"/>
+				<db:bulk-update doc:name="Bulk update Product3" doc:id="6f1ca154-a7c9-40cd-9d8f-ed66d60ef03d" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductCode=:ProductCode3, [Target].ProductValue=:ProductValue3, [Target].ProductQuantity=:ProductQuantity3, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate, [Target].MessageClass=:MessageClass  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, TransactionNumber, ShiftMark, AuxiliaryMesasgeNumber, ProductCode, ProductValue, ProductQuantity, CreatedDate, UpdatedDate, MessageClass)
+VALUES ( :TransactionHeaderID, :TransactionNumber, :ShiftMark, :AuxiliaryMesasgeNumber, :ProductCode3, :ProductValue3, :ProductQuantity3, :CreatedDate, :UpdatedDate, :MessageClass );]]></db:sql>
+		</db:bulk-update>
+				<logger level="INFO" doc:name="Logger" doc:id="cda1b8d3-7a0d-4438-a92d-429c5f4b5c7c" message=":::After Product3 update : #[payload]:"/>
+			</route>
+			<route>
+			<logger level="INFO" doc:name="Logger" doc:id="c3e59079-c401-4f93-a8f4-4adbe49f8aaf" message=":::BeforeProduct4 update : #[payload]:"/>
+				<db:bulk-update doc:name="Bulk update Product4" doc:id="764f09da-447b-4861-ba52-e1d0c85c9842" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductCode=:ProductCode4, [Target].ProductValue=:ProductValue4, [Target].ProductQuantity=:ProductQuantity4, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate, [Target].MessageClass=:MessageClass  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, TransactionNumber, ShiftMark, AuxiliaryMesasgeNumber, ProductCode, ProductValue, ProductQuantity, CreatedDate, UpdatedDate, MessageClass)
+VALUES ( :TransactionHeaderID, :TransactionNumber, :ShiftMark, :AuxiliaryMesasgeNumber, :ProductCode4, :ProductValue4, :ProductQuantity4, :CreatedDate, :UpdatedDate, :MessageClass );]]></db:sql>
+		</db:bulk-update>
+				<logger level="INFO" doc:name="Logger" doc:id="04b3bc5a-bf46-4bf9-9beb-23fa763b719c" message=":::After Product4 update : #[payload]:"/>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="553cb125-fa30-4026-a164-ba04847bba26" message=":After MessageClass2 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="test-poc-db-messageclass2-insertFlow5-new-productdetails-insert-operation" doc:id="81030ca5-c53b-4fac-b7a5-c9a272a4cfa5" >
+		<ee:transform doc:name="Transform Message" doc:id="6f7a260d-340e-4b39-b2a4-8e7275e2985e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	
+	  payload.TransactionDetails map ( transactionDetail , indexOfTransactionDetail ) -> {
+		MessageClass2: transactionDetail.MessageClass2 map ( messageClass2 , indexOfMessageClass4 ) -> {
+			TransactionHeaderID: messageClass2.TransactionNumber,
+			//ProductCode: messageClass2.ProductCode,
+			TransactionNumber: messageClass2.TransactionNumber,
+			//ProductInformation3: messageClass2.ProductInformation3,
+			ShiftMark: messageClass2.ShiftMark,
+			//ProductValue: messageClass2.ProductValue,
+			//ProductInformation1: messageClass2.ProductInformation1,
+			MessageClass: messageClass2.MessageClass,
+			//ProductInformation2: messageClass2.ProductInformation2,
+			AuxiliaryMesasgeNumber: messageClass2.AuxiliaryMesasgeNumber,
+			//ProductQuantity: messageClass2.ProductQuantity,
+			ProductCode1: messageClass2.ProductCode1,
+			ProductValue1: messageClass2.ProductValue1,
+			ProductQuantity1: messageClass2.ProductQuantity1,
+			ProductCode2: messageClass2.ProductCode2,
+			ProductValue2: messageClass2.ProductValue2,
+			ProductQuantity2: messageClass2.ProductQuantity2,
+			ProductCode3: messageClass2.ProductCode3,
+			ProductValue3: messageClass2.ProductValue3,
+			ProductQuantity3: messageClass2.ProductQuantity3,
+			ProductCode4: messageClass2.ProductCode4,
+			ProductValue4: messageClass2.ProductValue4,
+			ProductQuantity4: messageClass2.ProductQuantity4,
+			CreatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			UpdatedDate: now() as DateTime as String {format: "yyyy-MM-dd HH:mm:ss"},
+			CreatedOrUpdatedBy6: "MuleSoft"
+			//CreatedDateTime6: "",
+			//UpdatedDateTime6: "",
+			//CreatedOrUpdatedBy6: ""
+		}
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="975d0e51-7d50-4c3e-b173-16b1628f1207" message=":MessageClass2 TransactionInsertion Data22 upsertM Messagseclass2: #[payload]:::"/>
+		  <ee:transform doc:name="Transform Message" doc:id="33a66e5f-fa55-47ad-ac36-748c6568d2d3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a0c166b1-58a5-4e40-ad2e-6d21c60c7de8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten((payload.MessageClass2))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<!-- <db:update doc:name="Update" doc:id="575ee7e9-070d-48b2-ac7b-5ad4240c3b7a" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[MERGE [tblProductDetail-M2] AS [Target]
+USING (SELECT TransactionHeaderID = :TransactionHeaderID) AS [Source] 
+    ON [Target].TransactionHeaderID = :TransactionHeaderID
+WHEN MATCHED THEN
+  UPDATE SET [Target].TransactionHeaderID=:TransactionHeaderID, [Target].ProductCode=:ProductCode, [Target].TransactionNumber=:TransactionNumber, [Target].ShiftMark=:ShiftMark, [Target].ProductValue=:ProductValue, [Target].AuxiliaryMesasgeNumber=:AuxiliaryMesasgeNumber, [Target].ProductQuantity=:ProductQuantity, [Target].CreatedDate=:CreatedDate, [Target].UpdatedDate=:UpdatedDate,  
+WHEN NOT MATCHED THEN
+  INSERT (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate)
+VALUES ( :TransactionHeaderID, :ProductCode, :TransactionNumber, :ShiftMark, :ProductValue, :AuxiliaryMesasgeNumber, :ProductQuantity, :CreatedDate, :UpdatedDate );]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:update> -->
+		<!-- <db:bulk-insert doc:name="MessageClass2 Bulk insert" doc:id="c7e21552-f27e-4930-a346-e80eadeb4915" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate) values (:TransactionHeaderID, :ProductCode, :TransactionNumber, :ShiftMark, :ProductValue, :AuxiliaryMesasgeNumber, :ProductQuantity, :CreatedDate, :UpdatedDate)]]></db:sql>
+		</db:bulk-insert> --> 
+		 <logger level="INFO" doc:name="Logger" doc:id="274e5664-1ff2-4ebd-adc1-baaa0d23a9b0" message=":BeforeSG:#[payload]:"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="c8321d87-e4fa-4806-8d3b-70b4b935acca" >
+			<route >
+				<choice doc:name="Choice" doc:id="578923a9-68d5-4fb9-a426-e120ca58485e" >
+					<when expression="#[payload[0].ProductCode1 &gt; 0] ">
+						<logger level="INFO" doc:name="Logger" doc:id="c956f53b-9e83-4380-8702-0735c46406c3" message=":::BeforeProduct1 update : #[payload]:" />
+						<db:bulk-insert doc:name="Bulk insert Product1" doc:id="fb1ee1a2-c517-444f-8476-543264ec1a89" config-ref="RetailInterface_Database_Config">
+					<db:sql><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate, MessageClass) values (:TransactionHeaderID, :ProductCode1, :TransactionNumber, :ShiftMark, :ProductValue1, :AuxiliaryMesasgeNumber, :ProductQuantity1, :CreatedDate, :UpdatedDate, :MessageClass)]]></db:sql>
+				</db:bulk-insert>
+						<logger level="INFO" doc:name="Logger" doc:id="f53bf363-b3af-40c2-8039-a8b59ce35534" message=":::After Product1 update : #[payload]:" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="481e8f35-d666-4555-90b3-d8397d0a7037" message=":ProductCode1 is zero Value:"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route >
+				<choice doc:name="Choice" doc:id="c4c43f87-fe07-4fd3-868c-ef3b0f4af2d3" >
+					<when expression="#[payload[0].ProductCode2 &gt; 0] ">
+						<logger level="INFO" doc:name="Logger" doc:id="5f4986d0-2d16-4f95-8abc-1c43d5ed426f" message=":::BeforeProduct2 update : #[payload]:" />
+						<db:bulk-insert doc:name="Bulk insert Product2" doc:id="0228b78a-0b78-464a-8326-4a4a59c5f7c3" config-ref="RetailInterface_Database_Config">
+					<db:sql><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate, MessageClass) values (:TransactionHeaderID, :ProductCode2, :TransactionNumber, :ShiftMark, :ProductValue2, :AuxiliaryMesasgeNumber, :ProductQuantity2, :CreatedDate, :UpdatedDate, :MessageClass)]]></db:sql>
+				</db:bulk-insert>
+						<logger level="INFO" doc:name="Logger" doc:id="53d87abf-b6b0-4c55-abde-b63557eac2eb" message=":::After Product2 update : #[payload]:" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="235ee873-eb92-4acb-a8e4-2edbfb801f40" message=":ProductCode2 is zero Value:"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route >
+				<choice doc:name="Choice" doc:id="abce9afc-e154-4ff7-80ee-b9891127f46c" >
+					<when expression="#[payload[0].ProductCode3 &gt; 0] ">
+						<logger level="INFO" doc:name="Logger" doc:id="64579dac-b209-4b4a-a881-ae26d598c424" message=":::BeforeProduct3 update : #[payload]:" />
+						<db:bulk-insert doc:name="Bulk insert Product3" doc:id="506de0d8-a95e-4154-af2c-db44bb9527dc" config-ref="RetailInterface_Database_Config">
+					<db:sql><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate, MessageClass) values (:TransactionHeaderID, :ProductCode3, :TransactionNumber, :ShiftMark, :ProductValue3, :AuxiliaryMesasgeNumber, :ProductQuantity3, :CreatedDate, :UpdatedDate, :MessageClass)]]></db:sql>
+				</db:bulk-insert>
+						<logger level="INFO" doc:name="Logger" doc:id="0bb9c616-36e5-4bb3-865f-669e8a717192" message=":::After Product3 update : #[payload]:" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="b61e255d-bcbb-42d8-b6be-4b030d95095d" message=":ProductCode3 is zero Value:"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route>
+				<choice doc:name="Choice" doc:id="86818630-82d3-44d8-9ad3-a82a5b8c3870" >
+					<when expression="#[payload[0].ProductCode4 &gt; 0] ">
+						<logger level="INFO" doc:name="Logger" doc:id="c7aaf1a2-0bc5-4bc5-bc7d-e67e451793b9" message=":::BeforeProduct4 update : #[payload]:" />
+						<db:bulk-insert doc:name="Bulk insert Product4" doc:id="29ea9c39-08b3-4a5d-8c6e-f777ba88cde8" config-ref="RetailInterface_Database_Config">
+					<db:sql><![CDATA[INSERT INTO [tblProductDetail-M2] (TransactionHeaderID, ProductCode, TransactionNumber, ShiftMark, ProductValue, AuxiliaryMesasgeNumber, ProductQuantity, CreatedDate, UpdatedDate, MessageClass) values (:TransactionHeaderID, :ProductCode4, :TransactionNumber, :ShiftMark, :ProductValue4, :AuxiliaryMesasgeNumber, :ProductQuantity4, :CreatedDate, :UpdatedDate, :MessageClass)]]></db:sql>
+				</db:bulk-insert>
+						<logger level="INFO" doc:name="Logger" doc:id="1a18af73-bd18-4590-b830-a68497a7a63f" message=":::After Product4 update : #[payload]:" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="b0258bf5-d7f1-4678-88d9-45b4e4848ac1" message=":ProductCode4 is zero Value:"/>
+					</otherwise>
+				</choice>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="c293e3cc-7170-4d3e-8f95-e239fdca24fe" message=":After MessageClass2 BulkInsert:#[payload]::"/> 
+	</flow>
+	<flow name="FileCheckFlowCall" doc:id="20bfe1b1-8e80-4520-878f-3e100053a5bb" >
+		<logger level="INFO" doc:name="Logger" doc:id="b87549c2-d305-4502-b900-0a8b9117ae76" message=":TrailerTransactionInsertion Data: #[payload]::::"/>
+		<db:select doc:name="Select" doc:id="e7771ca7-30b5-4463-ba50-20c71e78f60b" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[SELECT * from tblOpayoPayloadInfo  where FileName in ('TotalTest1.a50');]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="c6d12ba3-8c75-4ffc-901e-db0cd9d81516" message=":FileCheckFlow:#[payload] and staus:#[payload.Status]:"/> 
+	</flow>
+</mule>

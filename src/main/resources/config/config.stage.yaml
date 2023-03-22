@@ -1,0 +1,174 @@
+logger:
+ category: "/"
+
+payloadlogger:
+ dbhost: "192.168.100.37"
+ dbport: "1433"
+ databasename: "MulesoftIntegration_Stage"
+
+db:  
+ retryFrequency: "10000" 
+ retryAttempts: "3"
+ 
+dbconnectionpool:
+ maxsize:  "5"
+ minsize:  "0"
+  
+dbreconnection:
+ frequency:  "30000" 
+ count:  "3"
+
+isPayloadLoggingEnabled: "true" 
+
+"IsAuthEnabled": "false"
+
+sftp:
+ host: "192.168.100.207"
+ port: "22"  
+ frequency: "100"
+ reconnectionfrequency: "10000"
+ reconnectionattempts: "3"       
+
+sftpdir1:          
+  Jarrow:
+   unprocessed: "/DEV/LiftingReports/Jarrow"
+   processed: "/DEV/LiftingReports/Jarrow/Processed"  
+   error: "/DEV/LiftingReports/Jarrow/error"  
+  Dagenham:
+   unprocessed: "/DEV/LiftingReports/Dagenham"
+   processed: "/DEV/LiftingReports/Dagenham/Processed" 
+   error: "/DEV/LiftingReports/Dagenham/error" 
+  Grangemouth: 
+   unprocessed: "/DEV/LiftingReports/Grangemouth"
+   processed: "/DEV/LiftingReports/Grangemouth/Processed"
+   error: "/DEV/LiftingReports/Grangemouth/error"
+  Killingholme:    
+   unprocessed: "/DEV/LiftingReports/Killingholme"
+   processed: "/DEV/LiftingReports/Killingholme/Processed"
+   error: "/DEV/LiftingReports/Killingholme/error"
+  Kingsbury:
+   unprocessed:"/DEV/LiftingReports/Kingsbury"
+   processed:"/DEV/LiftingReports/Kingsbury/Processed"
+   error:"/DEV/LiftingReports/Kingsbury/error"
+  Nustar:
+   unprocessed: "/DEV/LiftingReports/Nustar"
+   processed: "/DEV/LiftingReports/Nustar/Processed"
+   error: "/DEV/LiftingReports/Nustar/error"
+  Plymouth:
+   unprocessed: "/DEV/LiftingReports/Plymouth"
+   processed: "/DEV/LiftingReports/Plymouth/Processed"
+   error: "/DEV/LiftingReports/Plymouth/error"
+  Westerleigh:
+   unprocessed: "/DEV/LiftingReports/Westerleigh"
+   processed: "/DEV/LiftingReports/Westerleigh/Processed" 
+   error: "/DEV/LiftingReports/Westerleigh/error"
+  Generic:
+   unprocessed: "/DEV/LiftingReports/Generic"
+   processed: "/DEV/LiftingReports/Generic/Processed"
+   error: "/DEV/LiftingReports/Generic/error"
+  Thirdparty:
+   unprocessed: "/DEV/LiftingReports/3rdParty"
+   processed: "/DEV/LiftingReports/3rdParty/Processed"
+   error: "/DEV/LiftingReports/3rdParty/error"   
+sftpdir:          
+  Jarrow:
+   unprocessed: "/UAT/LiftingReports/Jarrow"
+   processed: "/UAT/LiftingReports/Jarrow/Processed"
+   error: "/UAT/LiftingReports/Jarrow/error"   
+  Dagenham:
+   unprocessed: "/UAT/LiftingReports/Dagenham"
+   processed: "/UAT/LiftingReports/Dagenham/Processed"
+   error: "/UAT/LiftingReports/Dagenham/error"
+  Grangemouth: 
+   unprocessed: "/UAT/LiftingReports/Grangemouth"
+   processed: "/UAT/LiftingReports/Grangemouth/Processed"
+   error: "/UAT/LiftingReports/Grangemouth/error" 
+  Killingholme:    
+   unprocessed: "/UAT/LiftingReports/Killingholme"
+   processed: "/UAT/LiftingReports/Killingholme/Processed"
+   error: "/UAT/LiftingReports/Killingholme/error"
+  Nustar:
+   unprocessed: "/UAT/LiftingReports/Nustar"
+   processed: "/UAT/LiftingReports/Nustar/Processed"
+   error: "/UAT/LiftingReports/Nustar/error"
+  Plymouth:
+   unprocessed: "/UAT/LiftingReports/Plymouth"
+   processed: "/UAT/LiftingReports/Plymouth/Processed"
+   error: "/UAT/LiftingReports/Plymouth/error"
+  Westerleigh:
+   unprocessed: "/UAT/LiftingReports/Westerleigh"
+   processed: "/UAT/LiftingReports/Westerleigh/Processed"
+   error: "/UAT/LiftingReports/Westerleigh/error" 
+  Kingsbury:
+   unprocessed: "/UAT/LiftingReports/Kingsbury"
+   processed: "/UAT/LiftingReports/Kingsbury/Processed"
+   error: "/UAT/LiftingReports/Kingsbury/error"
+  Generic:
+   unprocessed: "/UAT/LiftingReports/Generic"
+   processed: "/UAT/LiftingReports/Generic/Processed"
+   error: "/UAT/LiftingReports/Generic/error"
+  Thirdparty:
+   unprocessed: "/UAT/LiftingReports/3rdParty"
+   processed: "/UAT/LiftingReports/3rdParty/Processed"
+   error: "/UAT/LiftingReports/3rdParty/error"
+   
+import_filepattern:
+  jarrow: "IMPORT_JARROW_TS*.xlsx" 
+  dagenham: "IMPORT_DAGENHAM_TS*.xlsx" 
+  grangemouth: "IMPORT_GRANGEMOUTH_TS*.xlsx" 
+  killingholme: "IMPORT_KILLINGHOLME_TS*.xlsx" 
+  kingsbury: "IMPORT_KINGSBURY_TS*.xlsx"
+  nustar: "IMPORT_NUSTAR_TS*.xlsx"
+  plymouth: "IMPORT_Plymouth*.xlsx"
+  westerleigh: "IMPORT_Westerleigh_TS*.xlsx"
+  
+filepattern:
+  jarrow: "Jarrow*.csv" 
+  dagenham: "Dagenham*.xlsx" 
+  grangemouth: "Grangemouth*.csv" 
+  killingholme: "Killingholme*.xls" 
+  kingsbury: "Kingsbury*.xls"
+  nustar: "Grays*.csv"
+  plymouth: "Plymouth*.xls"
+  westerleigh: "Westerleigh*.xls"
+  generic: "Generic*.csv"
+  thirdparty: "IMPORT_3RD PARTY_TS_*.xls"
+                  
+frequency:
+  jarrow: "30"
+  dagenham: "30"
+  grangemouth: "30"
+  killingholme: "30"
+  kingsbury: "30"
+  nustar: "30"
+  plymouth: "30"
+  westerleigh: "30"
+  generic: "30"
+  thirdparty: "30"
+         
+systemapi:
+ host: "mule-worker-internal-prx-salesforce-sapi-stage.uk-e1.cloudhub.io"
+ port: "8091" 
+ basepath: "/api/v1" 
+ tradedumpliftingspath: "tradedumpliftings"
+ timeout: "30000"
+ liftingreports: "/liftingreports"
+ releasenumber: "/releasenumber" 
+ 
+tradedumphttp:
+ host: "mule-worker-internal-prx-tradedump-sapi-stage.uk-e1.cloudhub.io" 
+ port: "8091"
+ path: "liftings" 
+ basepath: "/api/v1/"
+ timeout: "30000"
+ 
+olfhttp:
+ host: "mule-worker-internal-prx-olf-eapi-stage.uk-e1.cloudhub.io" 
+ port: "8091"
+ path: "releasenumber"
+ timeout: "30000" 
+  
+cloudhub:
+ env: "d57b89bf-834f-4759-9d84-2578d71654f3"  
+    
+

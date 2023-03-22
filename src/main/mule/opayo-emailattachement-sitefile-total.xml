@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+
+	<flow name="opayo-implementationFlow55" doc:id="74979b78-7fc8-4653-9483-652cba487f3f" >
+		 <sftp:listener doc:name="opayoFileListener" doc:id="8aed7e76-2d5d-4103-a98a-5c12dbdde156" recursive="false" directory="${sftpdir.opayo.unprocessed}" moveToDirectory="#[vars.targetfolder]" config-ref="SFTP_Config" renameTo="#[(vars.dataEntityValue replace  /.a50/ with (&quot;&quot;)) ++ (now() as String {format: &quot;yyyyMMddHHmmss&quot;}) ++ '.a50']" outputMimeType='application/flatfile; schemapath="schemas/opayo.ffd"; recordparsing=lenient'>
+			<reconnect frequency="${sftp.reconnectionfrequency}" count="${sftp.reconnectionattempts}" />
+			<scheduling-strategy>
+				<fixed-frequency frequency="${frequency.opayo}" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<sftp:matcher/>
+		</sftp:listener> 
+		<logger level="INFO" doc:name="Logger" doc:id="67292e36-19d6-4497-9234-0c25403a8a5c" message="::Started::::::#[payload] ::"/>
+		<!-- <ee:transform doc:name="CSV" doc:id="d1fb17df-ab98-4dfc-8d50-80d3bc47b769" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="csvValues" ><![CDATA[%dw 2.0
+output application/csv separator=";", header=false
+-&#45;&#45;
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e5509b8a-b7cc-4bdc-9e79-96029639d73b" message=":::AfterCSV DW: #[vars.csvValues]:"/> -->
+		<try doc:name="Try" doc:id="6f8e74e4-e446-46b3-92ee-bb66bcc6b831" > 
+			<!-- <ee:transform doc:name="setRequest" doc:id="6e486ee1-60f5-4421-a3c2-c99e31dc07ab">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0 
+import lines from dw::core::Strings output application/json 
+-&#45;&#45; 
+lines(payload)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<!-- <ee:transform doc:name="setRequest" doc:id="b6331f20-40eb-4d8b-99c5-a5821b32a3d8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun getCustomerRef(loadNo: Number, customerRef: Number) =
+if ( customerRef matches(/([0-9]{1}$)/)) 
+loadNo
+else
+customerRef
+-&#45;&#45;
+{
+    liftingreport: payload filter ((item, index) -> item."Stockholder" == "Prax") map ((jarrow, indexofjarrow) -> 
+     {
+        "bolNumber": getCustomerRef((jarrow."Load No" replace  /"/ with ("")), (jarrow."Customer Ref" replace  /"/ with (""))),
+        "fileName": attributes.fileName,
+        "authorisationCode": jarrow."Auth Code",
+        "orderNumber": null,
+        "externalReference": null,
+        "vehicleRegistration": null,
+        "trailerNumber": null,
+        "driverName": null,
+        "haulierId": null,
+        "haulier": null,
+        "terminal": "Jarrow",
+        "stockholderId": null,
+        "stockholder": jarrow."Stockholder",
+        "clientId": null,
+        "client": null,
+        "customerId": null,
+        "customer": jarrow."Alloc Ref",
+        "loadedDate": (jarrow."Lifting Date" as LocalDateTime {format: "dd/MM/yyyy HH:mm"} as DateTime{format: "yyyy-MM-dd'T'HH:mm':00'"}),
+        "productCode": null,
+        "productName": jarrow."Product",
+        "productNatural": (jarrow."Litres" replace  /,/ with ("")) as Number,
+        "productStandard": (jarrow."Litres 15" replace  /,/ with ("")) as Number,
+        "productWeight": (jarrow."Kg in air" replace  /,/ with ("")) as Number,
+        "density": jarrow."Density in vac",
+        "temperature": jarrow."Temperature",
+        "tank": jarrow."Tank Name",
+        "dutyType": null,
+        "loadNo": jarrow."Load No",
+        "customerRef": null, 
+        "carrier": jarrow."Carrier",
+        "description": null,
+        "cust_ref_no": null,
+        "destination": jarrow."Ship To",
+        "doc_num": null,
+        "dutyPayable": null,
+        "dutyFree": null,
+        "dutyOther": null,
+        "dutyPaid": null,
+        "dutyDrawback": null,
+        "dutyStatus": jarrow."Duty Status",
+        "clientCode": null,
+        "addve_ppm": null,
+        "stoltRef": null,
+        "productWeightinVac": jarrow."Kg in vac",
+        "cardNumber": null,
+        "carrierCode":null,
+        "tractorLicence":null,
+        "naturalVolumeRefuel":null,
+        "standardVolumeRefuel":null
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> -->
+			<!-- <http:request method="POST" doc:name="invokeSystemAPI" doc:id="2cc01ad6-5035-4f39-81d2-b27a2dcd8f88" config-ref="HTTP_Request_configuration" path=" ${systemapi.liftingreports}" responseTimeout="${httpresponse.timeout}">
+			<reconnect frequency="${httpreconnection.frequency}" count="${httpreconnection.attempts}" />
+				<http:headers><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	dataEntityName : vars.dataEntityName,
+	dataEntityValue : vars.dataEntityValue,
+	trackingID : vars.trackingID
+}]]]></http:headers>
+		</http:request> -->
+			<!-- <ee:transform doc:name="Transform Message" doc:id="c236dae2-f2a9-4122-bdcf-59b531e4f7d1" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0 
+import lines from dw::core::Strings 
+output application/json 
+-&#45;&#45; 
+payload map ((opayo, index) ->  {
+   "MessageClass4":opayo[0 to 55]
+})]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<email:send doc:name="sendEmail" doc:id="fdc3645a-776b-42c5-ba9c-5b3024c6a7c9" config-ref="Email_SMTP" fromAddress="Muthuraj.Pitchaiah@external.prax.com" subject="Site File">
+				<email:to-addresses >
+					<email:to-address value="Muthuraj.Pitchaiah@external.prax.com" />
+				</email:to-addresses>
+				<email:body>
+					<email:content ><![CDATA[Please Find Attachment Details]]></email:content>
+				</email:body>
+				<email:attachments><![CDATA[#[{
+	"SiteTotal.xml" : payload
+}]]]></email:attachments>
+			</email:send>
+			<logger level="INFO" doc:name="Logger" doc:id="91e5a0d0-42f4-4a5f-970b-4d9557609a02" message=":FinalRequest:::#[payload]::::"/>
+			<!-- <raise-error doc:name="Raise error" doc:id="45dacf0b-5a30-4f7f-99b8-8ca298121f98" type="ANY"/> -->
+			<!-- <foreach doc:name="For Each" doc:id="9abc5cf7-1a42-48a5-84d7-f32ac9389428" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="9c744921-e913-4f61-924f-c0b80a5082cc" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
+			</foreach> --> 
+			<logger level="INFO" doc:name="Logger" doc:id="c5156231-601a-400d-85ec-4cdc20868418" message="OrigianlPayload:#[vars.originallPayload]::::"/>
+			<ee:transform doc:name="setTargetFolder" doc:id="19d24e88-1dd3-4bfc-81a1-a65e00abc30e" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.opayo.processed')]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="10315aaf-675c-4f6a-a0b4-4560d32d66c3" >
+					<ee:transform doc:name="setTargetFolder" doc:id="44e9cfc7-38d6-4aef-b657-3dadc799c20c" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.opayo.error')]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<error-handler ref="global-exceptionError_Handler" />
+	</flow>
+</mule>

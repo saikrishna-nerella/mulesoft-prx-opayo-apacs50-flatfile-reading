@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
+	<error-handler name="global-exceptionError_Handler"
+		doc:id="bfa528e7-8fda-4ae2-a4d8-a7f9544dbca3">
+ 
+		<on-error-propagate type="HTTP:NOT_ACCEPTABLE"
+			enableNotifications="true" logException="true">
+			<ee:transform
+				xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
+				doc:name="setPayloadToErrorObject">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorCode: "HTTP_NOT_ACCEPTABLE",
+  	errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  	errorDescription: error.description
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError" doc:id="15326084-3476-4d24-9c38-a2e24d6938f9" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;appName: app.Name,&#10;timestamp: now(),&#10;businessInterface: vars.interfaceID,&#10;flowName: flow.Name,&#10;messageId: vars.messageID,&#10;trackingId: vars.trackingID,&#10;correlationId: null,&#10;dataEntityName: vars.dataEntityName,&#10;dataEntityType: vars.dataEntityType,&#10;dataEntityValue: vars.dataEntityValue,&#10;dataSource: vars.dataSource,&#10;message: "Error occurred",error: &#10;{&#10;	errorCode: "HTTP_NOT_ACCEPTABLE",&#10;  	errorMessage: write(error.errorType, "application/java") default  "Unknown",&#10;  	errorDescription: error.description&#10;}&#10;}]' category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow" doc:id="f9a1b772-9b48-4599-9f88-04f2169f5edc" name="createNotificationFlow" />
+            
+
+</on-error-propagate>
+		<on-error-propagate
+			type="HTTP:UNSUPPORTED_MEDIA_TYPE" enableNotifications="true"
+			logException="true">
+			<ee:transform
+				xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
+				doc:name="setPayloadToErrorObject">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorCode: "HTTP_UNSUPPORTED_MEDIA_TYPE",
+  	errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  	errorDescription: error.description
+ }]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError"
+				doc:id="ad0f5592-464f-435c-bff0-28d38b1d7b8c"
+				message='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;appName: app.Name,&#10;timestamp: now(),&#10;businessInterface: vars.interfaceID,&#10;flowName: flow.Name,&#10;messageId: vars.messageID,&#10;trackingId: vars.trackingID,&#10;correlationId: null,&#10;dataEntityName: vars.dataEntityName,&#10;dataEntityType: vars.dataEntityType,&#10;dataEntityValue: vars.dataEntityValue,&#10;dataSource: vars.dataSource,&#10;message: "Error occurred",&#10;error: &#10;{&#10;	errorCode: "HTTP_UNSUPPORTED_MEDIA_TYPE",&#10;  	errorMessage: write(error.errorType, "application/java") default  "Unknown",&#10;  	errorDescription: error.description&#10;}&#10;}]'
+				category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow"
+				doc:id="a02df5f2-c9ce-48ce-b86e-091c43418081"
+				name="createNotificationFlow" />
+            
+
+</on-error-propagate>
+		<on-error-propagate type="HTTP:BAD_REQUEST"
+			enableNotifications="true" logException="true">
+			<ee:transform
+				xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
+				doc:name="setPayloadToErrorObject">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorCode: "HTTP_BAD_REQUEST",
+  	errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  	errorDescription: error.description
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError"
+				doc:id="84a598e6-82af-4d75-ba1f-3583071167b7"
+				message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Error occurred",
+&#10;error: 
+&#10;{
+&#10;	errorCode: "HTTP_BAD_REQUEST",
+&#10;  	errorMessage: write(error.errorType, "application/java") default  "Unknown",
+&#10;  	errorDescription: error.description
+&#10;}
+&#10;}]'
+				category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow"
+				doc:id="98149498-4e4a-4511-8318-78f0cc45b68c"
+				name="createNotificationFlow" />
+		</on-error-propagate>
+		<on-error-propagate type="HTTP:NOT_FOUND"
+			enableNotifications="true" logException="true">
+			<ee:transform
+				xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
+				doc:name="setPayloadToErrorObject">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  errorCode: "HTTP_NOT_FOUND",
+  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  errorDescription: error.description
+}
+]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError"
+				doc:id="10216c14-13f3-4b29-8cea-5bda33c98b79"
+				message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Error Occurred",
+&#10;error: 
+&#10;{
+&#10;  errorCode: "HTTP_NOT_FOUND",
+&#10;  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+&#10;  errorDescription: error.description
+&#10;}
+&#10;}]'
+				category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow"
+				doc:id="ab7e488f-c957-410e-8a26-4801e3835de5"
+				name="createNotificationFlow" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c8d0a7f4-9170-4fd6-8aa8-612c6b08c406" type="HTTP:INTERNAL_SERVER_ERROR">
+			<ee:transform doc:name="setPayloadToErrorObject" doc:id="241ed333-ff0a-45ed-807f-421cb9215630" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  errorCode: "Internal Server Error",
+  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  errorDescription: error.description
+}
+]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError" doc:id="d3d07421-8b11-4820-b83f-2ade6802e7df" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Error Occurred",
+&#10;error: 
+&#10;{
+&#10;  errorCode: "UNHANDLED_EXCEPTION",
+&#10;  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+&#10;  errorDescription: error.description
+&#10;}
+&#10;}]' category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow" doc:id="41e9f2f7-6667-4277-b648-49ef5cef4ecd" name="createNotificationFlow" />
+		</on-error-propagate>
+		
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6516a011-6a47-4b56-ab9b-26d61e8f87ca" type="ANY">
+			<ee:transform doc:name="setPayloadToErrorObject" doc:id="10291c97-ccc9-4739-a009-82375257d8ce" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  errorCode: "ANY",
+  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+  errorDescription: error.description
+}
+]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="ERROR" doc:name="logError" doc:id="29a6ca13-d76c-4dde-a174-5e6c3b4ffb7d" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Error Occurred",
+&#10;error: 
+&#10;{
+&#10;  errorCode: "UNHANDLED_EXCEPTION",
+&#10;  errorMessage: write(error.errorType, "application/java") default  "Unknown",
+&#10;  errorDescription: error.description
+&#10;}
+&#10;}]' category="${logger.category}" />
+			<flow-ref doc:name="callCreateNotificationFlow" doc:id="bc4e4c20-8d44-4230-8ec0-7323b28ad597" name="createNotificationFlow" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="createNotificationFlow"
+		doc:id="4fe01c31-86d2-4b2d-bae4-c0e56ce45be2">
+		<cloudhub:create-notification
+			doc:name="createNotification"
+			doc:id="eeff5ea8-2f3d-4ef0-8e87-9c5899f7938b"
+			config-ref="CloudHub_Config" domain="#[app.Name]"
+			priority="ERROR" transactionId="#[vars.trackingId default uuid()]"
+			doc:description="Creates Notification to cloudhub environment. Alerts are triggered based on these notifications.">
+			<reconnect frequency="${cloudhub.reconnectionfrequency}"
+				count="${cloudhub.reconnectionattempts}" />
+			<cloudhub:message><![CDATA[#[%dw 2.0
+output application/java
+---
+"Error Occurred.Error Description: " ++ error.description ++ "\nTrackingId: " ++ vars.trackingID ++ "\nDataEntityName: " ++ vars.dataEntityName ++ "\nDataEntityValue: " ++ vars.dataEntityValue]]]>
+</cloudhub:message>
+			</cloudhub:create-notification>
+	</sub-flow>
+</mule>

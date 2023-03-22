@@ -1,0 +1,84 @@
+form: FIXEDWIDTH
+structures:
+- id: 'BatchReq'
+  name: Batch Request
+  data:
+  - { idRef: 'FileHeader' }
+  - groupId: 'TransactionDetails'
+    count: '>1'
+    items:
+    - { idRef: 'TransactionHeader' }
+    - { idRef: 'MessageClass4', count: '>1' }
+    - { idRef: 'MessageClass2', count: '>1' }
+    - { idRef: 'MessageClass3', count: '>1' }
+    - { idRef: 'TransactionTrailer' }
+  - { idRef: 'FileTrailer' }
+segments:
+- id: 'FileHeader'
+  name: "Request File Header Record"
+  values:
+  - { name: 'Beginning of a file', type: String, length: 2, tagValue: '@H' }
+- id: 'TransactionHeader'
+  name: "Request File Transaction Header Record"
+  values:
+  - { name: 'Indicator', type: String, length: 1, tagValue: 'H' }
+  - { name: 'TransactionHeaderValue', type: String, length: 112 }
+- id: 'MessageClass4'
+  name: "Transaction Detail Record for MessageClass4"
+  values:
+  - { name: 'MessageClass', type: Integer, length: 1, tagValue: '4' }
+  - { name: 'ShiftMark', type: Integer, length: 1 }
+  - { name: 'TransactionNumber', type: String, length: 4 }
+  - { name: 'TransactionSource', type: Integer, length: 1 }
+  - { name: 'CardholderNumber', type: String, length: 19 }
+  - { name: 'CardExpiryDate', type: Integer, length: 4 }
+  - { name: 'TransactionDate', type: Integer, length: 6 }
+  - { name: 'TransactionTime', type: Integer, length: 4 }
+  - { name: 'Amount', type: Integer, length: 7 }
+  - { name: 'TransactionType', type: Integer, length: 1 }
+  - { name: 'CardIssueNumber', type: Integer, length: 2 }
+  - { name: 'TerminalType', type: Integer, length: 1 }
+  - { name: 'ReservedUKCards1', type: Integer, length: 1 }
+  - { name: 'AuthorisationCode', type: String, length: 6 }
+  - { name: 'ReservedUKCards2', type: Integer, length: 2 }
+  - { name: 'AuthorisationMethod', type: Integer, length: 1 }
+  - { name: 'DiscretionaryData1', type: Integer, length: 6 }
+  - { name: 'DiscretionaryData2', type: String, length: 7 }
+- id: 'MessageClass2'
+  name: "Transaction Detail Record for MessageClass2"
+  values:
+  - { name: 'MessageClass', type: Integer, length: 1, tagValue: '2' }
+  - { name: 'ShiftMark', type: Integer, length: 1 }
+  - { name: 'TransactionNumber', type: String, length: 4 }
+  - { name: 'AuxiliaryMesasgeNumber', type: String, length: 2 }
+  - { name: 'ProductCode1', type: Integer, length: 2 }
+  - { name: 'ProductValue1', type: String, length: 5 }
+  - { name: 'ProductQuantity1', type: String, length: 5 }
+  - { name: 'ProductCode2', type: Integer, length: 2 }
+  - { name: 'ProductValue2', type: String, length: 5 }
+  - { name: 'ProductQuantity2', type: String, length: 5 }
+  - { name: 'ProductCode3', type: Integer, length: 2 }
+  - { name: 'ProductValue3', type: String, length: 5 }
+  - { name: 'ProductQuantity3', type: String, length: 5 }
+  - { name: 'ProductCode4', type: Integer, length: 2 }
+  - { name: 'ProductValue4', type: String, length: 5 }
+  - { name: 'ProductQuantity4', type: String, length: 5 }
+- id: 'MessageClass3'
+  name: "Transaction Detail Record for MessageClass3"
+  values:
+  - { name: 'MessageClass', type: Integer, length: 1, tagValue: '3' }
+  - { name: 'ShiftMark', type: Integer, length: 1 }
+  - { name: 'TransactionNumber', type: String, length: 4 }
+  - { name: 'MessageType', type: Integer, length: 2 }
+  - { name: 'VehicleRegistrationNumber', type: String, length: 16 }
+  - { name: 'KilometreMileage', type: String, length: 8 }
+  - { name: 'Reserved', type: Integer, length: 5 }
+- id: 'TransactionTrailer'
+  name: "Request File Transaction Trailer Record"
+  values:
+  - { name: 'Indicator', type: String, length: 1, tagValue: 'T' }
+  - { name: 'TransactionTrailerValue', type: String, length: 112 }
+- id: 'FileTrailer'
+  name: "Request File Footer Record"
+  values:
+  - { name: 'End of a file', type: String, length: 2, tagValue: '@T' }  

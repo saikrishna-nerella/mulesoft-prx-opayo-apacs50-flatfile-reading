@@ -1,0 +1,119 @@
+logger:
+ category: "/"
+
+payloadlogger:
+ dbhost: "192.168.100.37"
+ dbport: "1433"
+ databasename: "MulesoftIntegration"
+
+db:  
+ retryFrequency: "10000" 
+ retryAttempts: "3"
+ 
+dbconnectionpool:
+ maxsize:  "5"
+ minsize:  "0"
+  
+dbreconnection:
+ frequency:  "30000" 
+ count:  "3"
+
+isPayloadLoggingEnabled: "true" 
+
+"IsAuthEnabled": "false"
+
+sftp:
+ host: "192.168.100.207"
+ port: "22"  
+ frequency: "100"
+ reconnectionfrequency: "10000"
+ reconnectionattempts: "3"   
+
+sftpdir1:          
+  Thirdparty:
+   unprocessed: "/DEV/Test"
+   processed: "/DEV/Test/processed"
+   error: "/DEV/Test/Error"
+
+sftpdir:          
+  opayo:
+   unprocessed: "/DEV/Total"
+   processed: "/DEV/Total/processed"
+   error: "/DEV/Total/Error"   
+            
+sftpdir45:          
+  opayo:
+   unprocessed: "/DEV/Test"
+   processed: "/DEV/Test/processed"
+   error: "/DEV/Test/Error" 
+  Thirdparty:
+   unprocessed: "/SIT/LiftingReports/3rdParty"
+   processed: "/SIT/LiftingReports/3rdParty/Processed"
+   error: "/SIT/LiftingReports/3rdParty/error"     
+   
+import_filepattern:
+  opayo: "TotalTest*.a50" 
+  thirdparty: "IMPORT_3RD PARTY_TS_*.xls"
+  test1: "test1*.csv"
+  test: "test*.xlsx"
+  
+
+ 
+sitefilepattern:
+  opayo: "SiteTotal*.*"
+    
+filepattern:
+  opayo: "TotalTest*.a50"
+                  
+frequency:
+  opayo: "30"
+  thirdparty: "30"
+  
+
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+systemapi:
+ host: "mule-worker-internal-prx-salesforce-sapi-test.uk-e1.cloudhub.io"
+ port: "8091" 
+ basepath: "/api/v1" 
+ tradedumpliftingspath: "tradedumpliftings"
+ timeout: "30000"
+ liftingreports: "/liftingreports"
+ releasenumber: "/releasenumber"
+
+tradedumphttp:
+ host: "mule-worker-internal-prx-tradedump-sapi-test.uk-e1.cloudhub.io" 
+ port: "8091"
+ path: "liftings"
+ timeout: "30000"
+ basepath: "/api/v1/" 
+ 
+olfhttp:
+ host: "mule-worker-internal-prx-olf-eapi-test.uk-e1.cloudhub.io" 
+ port: "8091"
+ path: "releasenumber"
+ timeout: "30000"
+ 
+smtp:
+ host: "192.168.100.191"
+ port: "25"
+ 
+mailfrom: Muthuraj.Pitchaiah@external.prax.com
+mailto: Muthuraj.Pitchaiah@external.prax.com 
+ 
+cloudhub:
+ env: "4a73d452-9b71-44fc-87b4-10b579c5abef"   
+    

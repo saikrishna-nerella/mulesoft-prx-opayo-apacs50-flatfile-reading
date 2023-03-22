@@ -1,0 +1,45 @@
+alertlogin:
+ password: "![Uni4Nl7Gfmnbw5PHcRIMpQ==]"
+ username: "![JNlySJlOy3DuqDO4k15L92zxVrsH5MXp]"
+ 
+payloadlogger:
+ dbuser: "![6OL2/rNYbe+LwVctgEj0xw==]"
+ dbpassword: "![ILbbjBCvKSzTblprFBrvUVFe1ls/JPu+5rmAVzwigo4=]"
+ 
+ 
+basicAuth:
+ username: "![00SMf84YtnM0lc7NFGNc+Q==]"
+ password: "![c1M3Qe/ZPFLqWxXIC1Cp8w==]" 
+
+salesforcesapibasicAuth:
+ username: "![FEuhLs6haZmVXS7cDQvhpIIPd1KZuQf5ulUtx50xOBE=]"
+ password: "![aw3VwVNCuHNkzqfoXFW5mrqr+x3kgO9r]"
+ 
+sftp:
+ username: "![lbooycwAgDx17IwyvP/Mrg==]"
+ password: "![+fhyfZP5+kxppBPhMzQF9A==]"
+ 
+salesforce:
+ systemuser: "![2HvFbvV+4i49lzsmIC9MlyWvhn83YyIycJrbq1P/bTlism9XAF7a/ZFioVTQ1G+E]"
+ systempassword: "![aw3VwVNCuHOoDh+dEeqXhqn72lNnfYO2]"
+ token: "![8ejKMQpN4GAvRANQon2H/a2lKU6+ta2FtDzFiPoIFg4=]"  
+ authorizationURL: "https://praxgroup--uat.my.salesforce.com/services/oauth2/authorize"
+ authorizationURL2: "https://praxgroup--uat.my.salesforce.com/services/oauth2/authorize"   
+ consumerkey: "![tNTaZZ9BD/MWt4kNwtOGBnL7sQqwAWYVwji/qpkLb3rZFt7Koj0HkwZND9rc9EZCFaIVMw4Al2wBwv3xV3T/wrGFSSbR8qENXjoUjqXCRVw1ZAt+uxytIg==]"
+ consumersecret: "![IY7xelqm2YHWR4TrVrmBVe6T2Hze7I9vhqHQA9HDXbpV+HNA5cWUma3+uuf0XKk7+aU16l0lDztF5tvKbu6EFoDpqXyXcjh0]"
+ accesstokenURL: "https://praxgroup--uat.my.salesforce.com/services/oauth2/token"
+ callbackpath: "/callback"
+ authorizepath: "/authorize"
+ externalcallbackURL: "http://localhost:8081/callback"
+ 
+salesforceBasicAuth:
+ username: "![2HvFbvV+4i49lzsmIC9MlyWvhn83YyIycJrbq1P/bTlism9XAF7a/bV6ekR3fVC3]"
+ password: "![aw3VwVNCuHOoDh+dEeqXhsi8r3zYNKmG]"
+ token: "![cQTYQyunANQwjgKWiHm5kg+gyuBgunB2BB6qrrNCDoc=]"
+ url: "https://praxgroup--uat.my.salesforce.com/services/Soap/u/53.0"  
+ 
+anypointmq:
+ clientid: "![qvNkoNpWSseFDWu7akRvZhhl5KQcEsdeRiL4QE73y7Nv0rNyF8ua+Q==]"
+ clientsecret: "![fouCWZeNvQ/LC7Eb9/Xl/4TOEoexKSnUdQCCFeKO8w84Qox2u8mQFA==]" 
+
+ 

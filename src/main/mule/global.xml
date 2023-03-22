@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:cloudhub="http://www.mulesoft.org/schema/mule/cloudhub" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="68dfa035-0848-4f46-9947-f0ebac8703cc" >
+		<email:smtp-connection host="${smtp.host}" port="${smtp.port}"/>
+	</email:smtp-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="21d646ea-7d4c-4f10-9e2a-b93ece9eae91" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="d46aa995-ae45-4e1f-b4dc-37454b56605c" file="config\config.${env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="00d3d187-f7f0-4bd2-b6bd-1a396aee29ef" name="env" value="test" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="017da147-0df2-4982-95e5-eebc20fe9440" file="config\config.secured.${env}.yaml" key="${key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration doc:name="Configuration" doc:id="2253e234-a5f6-4d7c-bb30-551d037e23e2" defaultErrorHandler-ref="global-exceptionError_Handler" />
+	<configuration-properties doc:name="Configuration properties" doc:id="b2f0bf89-0faf-42c5-9128-c0d81a54843e" file="config\common.yaml" />
+	<cloudhub:config name="CloudHub_Config" doc:name="CloudHub Config" doc:id="c5ab131f-c9f4-4ce1-93cb-5f45fcd5b419" >
+		<cloudhub:connection username='${secure::alertlogin.username}' password='${secure::alertlogin.password}' environment="${cloudhub.env}" />
+	</cloudhub:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="bbb9eb9b-6617-4ba6-be0b-979903c315f3" basePath="${systemapi.basepath}" >
+		<http:request-connection host="${systemapi.host}" port="${systemapi.port}">
+			<http:authentication >
+				<http:basic-authentication username="${secure::salesforcesapibasicAuth.username}" password="${secure::salesforcesapibasicAuth.password}"/>
+			</http:authentication>
+		</http:request-connection>
+	</http:request-config>
+	<import doc:name="Import" doc:id="e8354304-aa62-4ee5-9ed6-c6756cf17cff" file="prx-payload-logger.xml" />
+	<import doc:name="Import" doc:id="cbfaf507-be44-4a60-93ad-11a9fc5b3546" file="prx-publish-message-queue.xml" />
+	<sftp:config name="SFTP_Config" doc:name="SFTP Config" doc:id="84399ab0-5116-442e-82e5-f545502c3bb0" >
+		<sftp:connection host="${sftp.host}" port="${sftp.port}" username="${secure::sftp.username}" password="${secure::sftp.password}" preferredAuthenticationMethods="#[['PUBLIC_KEY','KEYBOARD_INTERACTIVE','PASSWORD']]">
+			<pooling-profile maxActive="10" maxIdle="10" />
+		</sftp:connection>
+	</sftp:config>
+	<global-property doc:name="Global Property" doc:id="6a5859fa-76aa-415b-88ec-08c1afbb6426" name="key" value="Pr@x$1999" />
+	<http:request-config name="OLFEAPI_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6770c69a-b15f-4ab8-8ef2-796ab7a8b67d" />
+	<http:request-config name="OLFEAPI_HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="78ba1e86-8dac-4d04-b494-ebcb77425496" basePath="/api/v1/" >
+		<http:request-connection host="${olfhttp.host}" port="${olfhttp.port}"/>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration_Tradedump" doc:name="HTTP Request configuration" doc:id="2b74083f-8ceb-4ecd-b253-85a878ec6f42" basePath="${tradedumphttp.basepath}" >
+		<http:request-connection host="${tradedumphttp.host}" port="${tradedumphttp.port}"/>
+	</http:request-config>
+	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="4f0c9447-f795-4758-8941-f961cc78106f" >
+		<anypoint-mq:connection url="${anypointmqurl}" clientId="${secure::anypointmq.clientid}" clientSecret="${secure::anypointmq.clientsecret}" />
+	</anypoint-mq:config>
+	<!-- <http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="27883766-044b-4393-ac3c-adc41392775c">
+        <http:listener-connection host="0.0.0.0" port="8091"/>
+    </http:listener-config> -->
+    <salesforce:sfdc-config name="Salesforce_Config_OAuth2.0" doc:name="Salesforce Config" doc:id="17ba1144-8b65-4f7b-960d-2f9c4ec1a675" >
+		<salesforce:config-with-oauth-connection >
+			<salesforce:oauth-authorization-code consumerKey="${secure::salesforce.consumerkey}" consumerSecret="${secure::salesforce.consumersecret}" authorizationUrl="${secure::salesforce.authorizationURL2}" accessTokenUrl="${secure::salesforce.accesstokenURL}"/>
+			<salesforce:oauth-callback-config listenerConfig="HTTP_Listener_config" callbackPath="${secure::salesforce.callbackpath}" authorizePath="${secure::salesforce.authorizepath}" externalCallbackUrl="${secure::salesforce.externalcallbackURL}"/>
+			<salesforce:oauth-store-config objectStore="Object_store" />
+		</salesforce:config-with-oauth-connection>
+	</salesforce:sfdc-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="138cb7b4-74f3-4307-b56c-5b994df0782f" config-ref="ObjectStore_Config"/>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="7b11f145-a92f-404b-ae9f-878d929db96a" />
+	<salesforce:sfdc-config name="Salesforce_Config_BasicAuth" doc:name="Salesforce Config" doc:id="0a905aff-2a32-48c3-a593-aa1326a1c641" >
+		<salesforce:basic-connection username="${secure::salesforceBasicAuth.username}" password="${secure::salesforceBasicAuth.password}" securityToken="${secure::salesforceBasicAuth.token}" url="${secure::salesforceBasicAuth.url}" />
+	</salesforce:sfdc-config>	
+			
+
+</mule>
