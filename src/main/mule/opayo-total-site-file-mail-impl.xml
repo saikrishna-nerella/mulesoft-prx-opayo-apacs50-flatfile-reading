@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+
+	<flow name="opayo-total-site-file-mail-impl" doc:id="0ec54bea-9568-425f-b73a-c02f067ebf45" >
+		 <sftp:listener doc:name="opayoSiteFileListener" doc:id="25f141a1-b3af-4b81-8f60-a44422bc4afc" recursive="false" directory="${sftpdir.total.unprocessed}" moveToDirectory="#[vars.targetfolder]" config-ref="SFTP_Config" renameTo="#[(vars.dataEntityValue replace  /.xlsx/ with (&quot;&quot;)) ++ (now() as String {format: &quot;yyyyMMddHHmmss&quot;}) ++ '.xlsx']" outputMimeType='application/xlsx' timeBetweenSizeCheckUnit="DAYS">
+			<reconnect frequency="${sftp.reconnectionfrequency}" count="${sftp.reconnectionattempts}" />
+			<scheduling-strategy>
+				<fixed-frequency frequency="${frequency.opayo}" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="${filepattern.total}" regularFiles="REQUIRE"/>
+		</sftp:listener> 
+		<logger level="INFO" doc:name="Logger" doc:id="55fdbae8-b329-426e-aeef-053ab0820771" message="::Started::::::#[payload] ::"/>
+		<ee:transform doc:name="setVariables" doc:id="e24d4ac2-4833-417e-afa7-77d371652a95" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="interfaceID"><![CDATA[%dw 2.0
+output text/plain
+---
+p('OpayoInterfaceID')]]></ee:set-variable>
+				<ee:set-variable variableName="trackingID"><![CDATA[%dw 2.0
+output text/plain
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityName"><![CDATA[%dw 2.0
+output text/plain
+---
+'OpayoReport']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityType"><![CDATA[%dw 2.0
+output text/plain
+---
+'Alphanumeric']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityValue"><![CDATA[%dw 2.0
+output text/plain
+---
+attributes.fileName]]></ee:set-variable>
+				<ee:set-variable variableName="messageID" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="inputFilePath" ><![CDATA[p('sftpdir.opayo.unprocessed')]]></ee:set-variable>
+				<ee:set-variable variableName="fileNameUpdatedtt" ><![CDATA[%dw 2.0
+	import * from dw::core::Strings
+	output application/json
+	---
+
+	 //substringBefore(vars.dataEntityValue, ".")
+	 vars.dataEntityValue replace  '.xlsx' with ""]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<!-- <ee:transform doc:name="CSV" doc:id="bfa0ad98-c7af-42ce-822a-9f4dd0f3c52f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="csvValues" ><![CDATA[%dw 2.0
+output application/csv separator=";", header=false
+-&#45;&#45;
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="602d3a35-6241-4f3d-a533-c877369dc634" message=":::AfterCSV DW: #[vars.csvValues]:"/> -->
+		<logger level="INFO" doc:name="logStart" doc:id="a7584637-fc5a-4d6f-8722-01392026c03e" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Start of flow and message received from listener"
+&#10;}]' />
+		<try doc:name="Try" doc:id="b2b02a59-4ba2-4c9e-95c6-aec92590d552" >
+			 <async doc:name="Async" doc:id="673608de-4587-4d05-bca1-09cbfbc7acfe">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="4dbc7e7f-a4c7-440f-80b5-586da23d0bb4" name="payloadLoggerStartFlow" />
+		</async> 
+			<!-- <ee:transform doc:name="setRequest" doc:id="afd37381-1103-47db-97da-7aded16f0761">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0 
+import lines from dw::core::Strings output application/json 
+-&#45;&#45; 
+lines(payload)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<!-- <ee:transform doc:name="setRequest" doc:id="9f1b7fa8-6e4a-4418-acce-d92b9e9ca6b0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun getCustomerRef(loadNo: Number, customerRef: Number) =
+if ( customerRef matches(/([0-9]{1}$)/)) 
+loadNo
+else
+customerRef
+-&#45;&#45;
+{
+    liftingreport: payload filter ((item, index) -> item."Stockholder" == "Prax") map ((jarrow, indexofjarrow) -> 
+     {
+        "bolNumber": getCustomerRef((jarrow."Load No" replace  /"/ with ("")), (jarrow."Customer Ref" replace  /"/ with (""))),
+        "fileName": attributes.fileName,
+        "authorisationCode": jarrow."Auth Code",
+        "orderNumber": null,
+        "externalReference": null,
+        "vehicleRegistration": null,
+        "trailerNumber": null,
+        "driverName": null,
+        "haulierId": null,
+        "haulier": null,
+        "terminal": "Jarrow",
+        "stockholderId": null,
+        "stockholder": jarrow."Stockholder",
+        "clientId": null,
+        "client": null,
+        "customerId": null,
+        "customer": jarrow."Alloc Ref",
+        "loadedDate": (jarrow."Lifting Date" as LocalDateTime {format: "dd/MM/yyyy HH:mm"} as DateTime{format: "yyyy-MM-dd'T'HH:mm':00'"}),
+        "productCode": null,
+        "productName": jarrow."Product",
+        "productNatural": (jarrow."Litres" replace  /,/ with ("")) as Number,
+        "productStandard": (jarrow."Litres 15" replace  /,/ with ("")) as Number,
+        "productWeight": (jarrow."Kg in air" replace  /,/ with ("")) as Number,
+        "density": jarrow."Density in vac",
+        "temperature": jarrow."Temperature",
+        "tank": jarrow."Tank Name",
+        "dutyType": null,
+        "loadNo": jarrow."Load No",
+        "customerRef": null, 
+        "carrier": jarrow."Carrier",
+        "description": null,
+        "cust_ref_no": null,
+        "destination": jarrow."Ship To",
+        "doc_num": null,
+        "dutyPayable": null,
+        "dutyFree": null,
+        "dutyOther": null,
+        "dutyPaid": null,
+        "dutyDrawback": null,
+        "dutyStatus": jarrow."Duty Status",
+        "clientCode": null,
+        "addve_ppm": null,
+        "stoltRef": null,
+        "productWeightinVac": jarrow."Kg in vac",
+        "cardNumber": null,
+        "carrierCode":null,
+        "tractorLicence":null,
+        "naturalVolumeRefuel":null,
+        "standardVolumeRefuel":null
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> -->
+			<!-- <http:request method="POST" doc:name="invokeSystemAPI" doc:id="fbc4ce9b-8815-44e7-a6dc-d9860367e5a0" config-ref="HTTP_Request_configuration" path=" ${systemapi.liftingreports}" responseTimeout="${httpresponse.timeout}">
+			<reconnect frequency="${httpreconnection.frequency}" count="${httpreconnection.attempts}" />
+				<http:headers><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	dataEntityName : vars.dataEntityName,
+	dataEntityValue : vars.dataEntityValue,
+	trackingID : vars.trackingID
+}]]]></http:headers>
+		</http:request> -->
+			<!-- <ee:transform doc:name="Transform Message" doc:id="71b69986-778a-4a15-964a-6f76b1c74258" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0 
+import lines from dw::core::Strings 
+output application/json 
+-&#45;&#45; 
+payload map ((opayo, index) ->  {
+   "MessageClass4":opayo[0 to 55]
+})]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+<!-- [STUDIO:"sendEmail"]			 <email:send doc:name="sendEmail" doc:id="c7296301-3b9c-4645-91db-00949891de91" config-ref="Email_SMTP" fromAddress="Muthuraj.Pitchaiah@external.prax.com" subject="SiteDetails">
+				<email:to-addresses >
+					<email:to-address value="Muthuraj.Pitchaiah@external.prax.com" />
+				</email:to-addresses>
+				<email:body>
+					<email:content ><![CDATA[Please Find Attachment Details]]></email:content>
+				</email:body>
+				<email:attachments><![CDATA[#[{
+	"SiteTotal.xlsx" : payload
+}]]]></email:attachments>
+			</email:send>  [STUDIO] -->
+			<ee:transform doc:name="Transform Message" doc:id="99c92503-9c68-4d9a-8e0a-d78bd0d4d092" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="fileNameUpdated" ><![CDATA[%dw 2.0
+	import * from dw::core::Strings
+	output application/json
+	---
+
+	 //substringBefore(vars.dataEntityValue, ".")
+	 vars.dataEntityValue replace  '.xlsx' with ""]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			 <email:send doc:name="sendEmailAttachement" doc:id="aef81404-7913-4a12-95ff-ced379560939" config-ref="Email_SMTP" fromAddress="Muthuraj.Pitchaiah@external.prax.com" subject="#[vars.dataEntityValue]">
+				<email:to-addresses >
+					<email:to-address value="Muthuraj.Pitchaiah@external.prax.com" />
+				</email:to-addresses>
+				<email:body contentType="text/plain" >
+					<email:content ><![CDATA[Email Content]]></email:content>
+				</email:body>
+				<email:attachments><![CDATA[#[{
+          'sitefile.xlsx' : "payload"
+        }]]]></email:attachments>
+			</email:send> 
+			<logger level="INFO" doc:name="Logger" doc:id="16db713f-67a1-4af7-994a-6ea9799555d1" message=":FinalRequest:::#[payload]::::"/>
+			<!-- <db:select doc:name="SelectMaxFileId" doc:id="50cb01c4-f01c-454b-b358-1dd629645ff7" config-ref="RetailInterface_Database_Config" target="FieldId1" transactionalAction="NOT_SUPPORTED">
+			<db:sql><![CDATA[SELECT max(FileId) as test from OpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="maxId" doc:id="83c84f5b-657f-4020-8ede-c9957a10b82b" message=":::AfterSelect))#[vars.FieldId1]:payload values:#[payload]:" />
+		<ee:transform doc:name="maxId" doc:id="ac386dbf-4f91-4f96-8b97-5143e56972bc">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="maxId" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+vars.FieldId1[0] default 0]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform> -->
+			<!-- <raise-error doc:name="Raise error" doc:id="48f53dc6-fe3f-4175-8132-b2739e440452" type="ANY"/> -->
+			<!-- <foreach doc:name="For Each" doc:id="082e6915-f141-4912-b3bf-f8229d54cc75" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="9a21e7a7-584b-4e0f-8007-e0890ee00596" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
+			</foreach> -->
+			<!-- <foreach doc:name="For Each" doc:id="3c71eeb0-0448-4d0f-bb4e-0e55593b268e" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass3-insertFlow4-final" doc:id="0f48b3ea-b6dc-457e-9fb1-fffe7fad2305" name="test-poc-db-messageclass3-insertFlow4-final" target="messageClass3InsertedData"/>
+			</foreach> -->
+			<async doc:name="Async" doc:id="6a4fa3e2-6747-4bb7-91db-504e9ac21957">
+				<flow-ref doc:name="callPayloadLoggerEndFlow" doc:id="effbfca4-152a-4491-ad62-60da3e1507f6" name="payloadLoggerEndFlow" />
+		</async>
+			<ee:transform doc:name="setTargetFolder" doc:id="408c6be5-5946-437f-b41a-5dbf0d4e0992" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.total.processed')]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4125f437-01b3-452a-8ec1-af93d5dd3708" >
+					<ee:transform doc:name="setTargetFolder" doc:id="625ee18a-4796-4095-a3f0-5dbed221576e" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.total.error')]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="endLog" doc:id="7f598d38-5849-430e-981d-5ebed507c4c5" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "End of flow and data set to caller successfully"
+&#10;}]'/>
+		<error-handler ref="global-exceptionError_Handler" />
+	</flow>
+</mule>

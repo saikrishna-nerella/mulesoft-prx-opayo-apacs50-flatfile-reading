@@ -27,7 +27,10 @@ sftp:
  port: "22"  
  frequency: "100"
  reconnectionfrequency: "10000"
- reconnectionattempts: "3"   
+ reconnectionattempts: "3"
+ ar:
+  invoice:
+    path: "/DEV/Invoice"   
 
 sftpdir1:          
   Thirdparty:
@@ -39,7 +42,17 @@ sftpdir:
   opayo:
    unprocessed: "/DEV/Total"
    processed: "/DEV/Total/processed"
-   error: "/DEV/Total/Error"   
+   error: "/DEV/Total/Error"
+  site:
+   unprocessed: "/DEV/Site"
+   processed: "/DEV/Site/processed"
+   error: "/DEV/Site/Error"
+   ffdOutput: "/DEV/Site/ffdOutput/"
+   ffdOutput2: "/DEV/Site/ffdOutput/siteoutputfile.ffd"   
+  total:
+   unprocessed: "/DEV/Total"
+   processed: "/DEV/Total/processed"
+   error: "/DEV/Total/Error"
             
 sftpdir45:          
   opayo:
@@ -64,6 +77,8 @@ sitefilepattern:
     
 filepattern:
   opayo: "TotalTest*.a50"
+  site: "*.xlsx"
+  total: "*.xlsx"
                   
 frequency:
   opayo: "30"

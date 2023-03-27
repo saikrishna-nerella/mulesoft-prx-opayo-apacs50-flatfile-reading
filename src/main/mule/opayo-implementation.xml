@@ -398,20 +398,27 @@ vars.FieldId1[0] default 0]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform> -->
 			<!-- <raise-error doc:name="Raise error" doc:id="b27f02ef-7116-4073-93fc-d1c4698823d1" type="ANY"/> -->
-			<flow-ref doc:name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-ok" doc:id="eea23351-600b-41ba-a264-b77ff36d8069" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final" target="opayoPayloadInsertData"/>
-			<foreach doc:name="For Each" doc:id="e463a69b-d012-4b61-8029-ad7b7c037fc2" collection="#[payload.TransactionDetails]" counterVariableName="posCounter">
-				<ee:transform doc:name="Each Point Of Sale Payload" doc:id="634195bd-9f28-4976-9487-e42c48bc2681" >
-					<ee:message >
+			<flow-ref doc:name="tblOpayoPayloadInfo-insertFlow" doc:id="eea23351-600b-41ba-a264-b77ff36d8069" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-1" target="opayoPayloadInsertData"/>
+			<try doc:name="Try" doc:id="4c4f3fbf-1ed0-4e3a-9485-d5999ed17795" transactionalAction="ALWAYS_BEGIN">
+				<foreach doc:name="For Each" doc:id="e463a69b-d012-4b61-8029-ad7b7c037fc2" collection="#[payload.TransactionDetails]" counterVariableName="posCounter">
+				<ee:transform doc:name="Each Point Of Sale Payload" doc:id="634195bd-9f28-4976-9487-e42c48bc2681">
+					<ee:message>
 					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="eachPOSRecord" ><![CDATA[%dw 2.0
+					<ee:variables>
+						<ee:set-variable variableName="eachPOSRecord"><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<flow-ref doc:name="calling-db-insert-implementationFlow-OpayoSiteheader-ok" doc:id="aaf44c2c-68a0-4286-b734-51ddecdcd67c" name="test-poc-db-insertFlow-final" target="headerTransactionInserted"/>
+				<flow-ref doc:name="calling-db-insert-implementationFlow-OpayoSiteheader-ok" doc:id="aaf44c2c-68a0-4286-b734-51ddecdcd67c" name="test-poc-db-insertFlow-final" target="headerTransactionInserted" />
 			</foreach>
+				<error-handler >
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="db939530-fc6b-4d19-ac1b-61fbad9fd599" >
+						<logger level="INFO" doc:name="Logger" doc:id="b05a7f2b-35d3-4c46-aa5f-5ab39878159d" message=":OnErrorPropagate:#[payload.error.errorDescription]::"/>
+					</on-error-propagate>
+				</error-handler>
+			</try>
 			<!-- <foreach doc:name="For Each" doc:id="389067ff-08ab-4d0b-bd6e-f1356d054bce" collection="#[vars.originallPayload.TransactionDetails]">
 				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="0e632a09-5e7c-44eb-bb1a-758f270df6a1" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
 			</foreach> -->

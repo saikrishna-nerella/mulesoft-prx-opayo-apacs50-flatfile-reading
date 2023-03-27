@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="opayo-sale-order-store-procedure-call-impl-scheduler-flow" doc:id="40c913b4-86ed-4d6c-bfa1-ec7fdd7cda90" >
+		<scheduler doc:name="Scheduler" doc:id="94b4f58a-312a-45c2-995a-48af77946f06" >
+			<scheduling-strategy >
+				<fixed-frequency timeUnit="MINUTES" startDelay="1000"/>
+			</scheduling-strategy>
+		</scheduler>
+		<ee:transform doc:name="setVariables" doc:id="dd73672c-a95e-46f7-99e3-bdcd05dd50a1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="interfaceID"><![CDATA[%dw 2.0
+output text/plain
+---
+p('OpayoInterfaceID')]]></ee:set-variable>
+				<ee:set-variable variableName="trackingID"><![CDATA[%dw 2.0
+output text/plain
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityName"><![CDATA[%dw 2.0
+output text/plain
+---
+'OpayoReport']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityType"><![CDATA[%dw 2.0
+output text/plain
+---
+'Alphanumeric']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityValue"><![CDATA[%dw 2.0
+output text/plain
+---
+attributes.fileName]]></ee:set-variable>
+				<ee:set-variable variableName="messageID" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="inputFilePath" ><![CDATA[p('sftpdir.opayo.unprocessed')]]></ee:set-variable>
+				<ee:set-variable variableName="fileNameUpdatedtt" ><![CDATA[%dw 2.0
+	import * from dw::core::Strings
+	output application/json
+	---
+
+	 //substringBefore(vars.dataEntityValue, ".")
+	 vars.dataEntityValue replace  '.xlsx' with ""]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		
+		<logger level="INFO" doc:name="logStart" doc:id="82a33143-7d26-41c9-a470-701bc02b5f26" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Start of flow and message received from listener"
+&#10;}]' />
+<async doc:name="Async" doc:id="adedac40-0b5c-429d-b9d0-6d22bb23d8e4">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="ce8875b4-b9de-4b8f-9af8-8c9b3142188d" name="payloadLoggerStartFlow" />
+		</async> 
+		<db:select doc:name="Select Customer Billing Mappings" doc:id="4bfd51da-738b-48d5-9a7b-fe7205ff1a60" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[Select * from [dbo].[OpayoCustomerMapping]]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Customers Metadata" doc:id="feca9403-a412-4889-b087-7b62b1d54477" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="metadata" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Get Customer Last Billing Cycle Info" doc:id="28fbf163-6c8e-4c20-be1e-0571811a5eff" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[Select * from [dbo].[OpayoCustomerBillingCycleInfo]]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Bill Cycle Info" doc:id="ff60b19c-090a-45c5-8332-acfb04302b80" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="billInfo" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Calculate Billing cycle info" doc:id="7fc4e74a-e926-4209-9813-407b65be54c3" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="nextExecutionDate" ><![CDATA[%dw 2.0
+output application/json
+
+fun getLastBillingCycleObject(metadaObj, billCycleObj) = (billCycleObj filter ($.OpayoCustomerMappingId == metadaObj.OpayoCustomerMappingId) orderBy ($.LastExecutionDate))[-1]
+fun getNextBillingCycleDate(item, billInfo) = (getLastBillingCycleObject(item, billInfo).NextBillingCycleDate as DateTime) + ("P$(item.BillingCycleinDays)D" as Period)
+---
+vars.metadata map ((item, index) -> {
+    customerName: item.OpayoCustomerName,
+    customerId: item.OpayoCustomerMappingId,
+    lastBillingCycleDate: getLastBillingCycleObject(item, vars.billInfo).NextBillingCycleDate,
+    nextBillingCycleDate: getNextBillingCycleDate(item, vars.billInfo),
+    lastExecutionDate: getLastBillingCycleObject(item, vars.billInfo).LastExecutionDate,
+    nextExecutionDate: getNextBillingCycleDate(item, vars.billInfo) + ("P$(item.BillingCycleBufferDays)D" as Period),
+})]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="63028816-d22f-4872-bd11-54e41eb61e71" >
+			<logger level="INFO" doc:name="Logger" doc:id="65558195-f425-4d0c-8203-b36926ca214e" />
+		
+		<ee:transform doc:name="Each Customer  Bill Cycle Details" doc:id="85d10b94-6dcd-4ddd-b9a1-13d6b8b0d89c" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="customerBillCycleInfo" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<choice doc:name="Choice" doc:id="6a93be29-7c68-4fd4-9f5b-1074a8515212" >
+			<when expression="#[vars.customerBillCycleInfo.nextExecutionDate == (now() as Date)]">
+					<try doc:name="Try" doc:id="efa374f8-202b-48a2-b9ae-78cd50e74086" >
+						<db:stored-procedure doc:name="Stored procedure" doc:id="fd48dee3-a0ef-4acd-a4a5-659479248bbf" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[CALL [dbo].[SPConsolidateDataByBillingCycle] (:LastBillingDate, :NextBillingDate)]]></db:sql>
+							<db:input-parameters ><![CDATA[#[{
+	LastBillingDate: vars.customerBillCycleInfo.lastBillingCycleDate,
+	NextBillingDate: vars.customerBillCycleInfo.nextBillingCycleDate
+}]]]></db:input-parameters>
+		</db:stored-procedure>
+						<db:insert doc:name="Insert" doc:id="b00adf02-c9e6-4b7d-be82-6bac0afc8f3c" config-ref="RetailInterface_Database_Config">
+			<db:sql><![CDATA[Insert into [dbo].[OpayoCustomerBillingCycleInfo] (OpayoCustomerMappingId, LastBillingCycleDate, NextBillingCycleDate, LastExecutionDate)
+values(:OpayoCustomerMappingId, :LastBillingCycleDate, :NextBillingCycleDate, :LastExecutionDate)]]></db:sql>
+						<db:input-parameters><![CDATA[#[{
+	OpayoCustomerMappingId:vars.customerBillCycleInfo.customerId,
+	LastBillingCycleDate:vars.customerBillCycleInfo.lastBillingCycleDate,
+	NextBillingCycleDate:vars.customerBillCycleInfo.nextBillingCycleDate,
+	LastExecutionDate:vars.customerBillCycleInfo.nextExecutionDate
+}]]]></db:input-parameters>
+		</db:insert>
+						<error-handler >
+							<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bdaa167b-073a-40e6-9a71-22418c2f102d" >
+								<logger level="INFO" doc:name="DB Error Logger" doc:id="722a3804-39aa-4ee6-b5cc-b22291ccdfa8" message="Transaction Rolled back due to error type '#[error.errorType]' and error description '#[error.description]'"/>
+							</on-error-propagate>
+						</error-handler>
+					</try>
+			</when>
+				<otherwise >
+					<logger level="INFO" doc:name="Default Logger" doc:id="d860d224-164d-4f48-ab7b-2a4d21ffb15a" message="Execution date '#[vars.customerBillCycleInfo.nextExecutionDate]' not matched for the customer name:  #[vars.customerBillCycleInfo.customerName]"/>
+				</otherwise>
+		</choice>
+		</foreach>
+		<async doc:name="Async" doc:id="a90ce170-46dc-4f80-8fad-7856dc3b1136">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="8a327da0-5ad0-43b4-ab3b-2f4c9893585e" name="payloadLoggerStartFlow" />
+		</async>
+<logger level="INFO" doc:name="endLog" doc:id="d82d6b30-7b6d-406a-a2a0-aa989b299a7c" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "End of flow and data set to caller successfully"
+&#10;}]'/>
+	</flow>
+</mule>

@@ -72,7 +72,17 @@ http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/m
 	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="7b11f145-a92f-404b-ae9f-878d929db96a" />
 	<salesforce:sfdc-config name="Salesforce_Config_BasicAuth" doc:name="Salesforce Config" doc:id="0a905aff-2a32-48c3-a593-aa1326a1c641" >
 		<salesforce:basic-connection username="${secure::salesforceBasicAuth.username}" password="${secure::salesforceBasicAuth.password}" securityToken="${secure::salesforceBasicAuth.token}" url="${secure::salesforceBasicAuth.url}" />
-	</salesforce:sfdc-config>	
+	</salesforce:sfdc-config>
+	<db:config name="RetailInterface_Database_Config" doc:name="Database Config" doc:id="9ed3d7ec-b014-4758-a095-fe65f43f314b" >
+		<db:mssql-connection host="192.168.100.245" port="1433" user="OpayoIntegration" password="Stateoil2022!" databaseName="OpayoIntegration">
+			
+		</db:mssql-connection>
+	</db:config>
+	<db:config name="RetailInterface_Database_Config-final" doc:name="Database Config" doc:id="792437b0-68f8-4241-9bb4-62cc96a89f25" >
+		<db:mssql-connection host="192.168.100.245" port="1433" user="OpayoIntegration" password="Stateoil2022!" databaseName="OpayoIntegration">
+			
+		</db:mssql-connection>
+	</db:config>	
 			
 
 </mule>

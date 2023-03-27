@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+
+	<flow name="opayo-bp-site-file-sftp" doc:id="ebe2ee81-1988-446a-b235-800309cba350" >
+		 <sftp:listener doc:name="opayoSiteFileListener" doc:id="1f97df81-02cb-4043-9d54-3ae21222e85e" recursive="false" directory="${sftpdir.site.unprocessed}" moveToDirectory="#[vars.targetfolder]" config-ref="SFTP_Config" renameTo="#[(vars.dataEntityValue replace  /.xlsx/ with (&quot;&quot;)) ++ (now() as String {format: &quot;yyyyMMddHHmmss&quot;}) ++ '.xlsx']" outputMimeType='application/xlsx' timeBetweenSizeCheckUnit="DAYS">
+			<reconnect frequency="${sftp.reconnectionfrequency}" count="${sftp.reconnectionattempts}" />
+			<scheduling-strategy>
+				<fixed-frequency frequency="${frequency.opayo}" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="${filepattern.site}" regularFiles="REQUIRE"/>
+		</sftp:listener> 
+		<logger level="INFO" doc:name="Logger" doc:id="f188b9da-a6ea-4a73-9d35-12a333e34524" message="::Started::::::#[payload] ::"/>
+		<ee:transform doc:name="setVariables" doc:id="c0a8b718-9ab5-418f-a086-ca98bab45e75" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="interfaceID"><![CDATA[%dw 2.0
+output text/plain
+---
+p('OpayoInterfaceID')]]></ee:set-variable>
+				<ee:set-variable variableName="trackingID"><![CDATA[%dw 2.0
+output text/plain
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityName"><![CDATA[%dw 2.0
+output text/plain
+---
+'OpayoReport']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityType"><![CDATA[%dw 2.0
+output text/plain
+---
+'Alphanumeric']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityValue"><![CDATA[%dw 2.0
+output text/plain
+---
+attributes.fileName]]></ee:set-variable>
+				<ee:set-variable variableName="messageID" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="inputFilePath" ><![CDATA[p('sftpdir.opayo.unprocessed')]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<!-- <ee:transform doc:name="CSV" doc:id="1150ec16-54ee-4a6e-9eb0-d0cdecb198d8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="csvValues" ><![CDATA[%dw 2.0
+output application/csv separator=";", header=false
+-&#45;&#45;
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5ec686d7-2154-4036-8667-30c0cf6edc5e" message=":::AfterCSV DW: #[vars.csvValues]:"/> -->
+		<logger level="INFO" doc:name="logStart" doc:id="fa200c0b-ab04-4ef7-976d-431d1db7fd57" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Start of flow and message received from listener"
+&#10;}]' />
+		<try doc:name="Try" doc:id="09ea72d9-4827-4af6-9e42-071629f89c67" >
+			 <async doc:name="Async" doc:id="b530fe9a-29fe-465b-af2d-4268460cf550">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="92064808-4a29-475b-8f0a-b43ebebb9b4a" name="payloadLoggerStartFlow" />
+		</async> 
+			<!-- <ee:transform doc:name="setRequest" doc:id="bc154230-5196-486b-adc2-43ccb7585bae">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0 
+import lines from dw::core::Strings output application/json 
+-&#45;&#45; 
+lines(payload)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<!-- <ee:transform doc:name="setRequest" doc:id="b43162e1-0d5c-4968-bd6f-c108374394eb">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+fun getCustomerRef(loadNo: Number, customerRef: Number) =
+if ( customerRef matches(/([0-9]{1}$)/)) 
+loadNo
+else
+customerRef
+-&#45;&#45;
+{
+    liftingreport: payload filter ((item, index) -> item."Stockholder" == "Prax") map ((jarrow, indexofjarrow) -> 
+     {
+        "bolNumber": getCustomerRef((jarrow."Load No" replace  /"/ with ("")), (jarrow."Customer Ref" replace  /"/ with (""))),
+        "fileName": attributes.fileName,
+        "authorisationCode": jarrow."Auth Code",
+        "orderNumber": null,
+        "externalReference": null,
+        "vehicleRegistration": null,
+        "trailerNumber": null,
+        "driverName": null,
+        "haulierId": null,
+        "haulier": null,
+        "terminal": "Jarrow",
+        "stockholderId": null,
+        "stockholder": jarrow."Stockholder",
+        "clientId": null,
+        "client": null,
+        "customerId": null,
+        "customer": jarrow."Alloc Ref",
+        "loadedDate": (jarrow."Lifting Date" as LocalDateTime {format: "dd/MM/yyyy HH:mm"} as DateTime{format: "yyyy-MM-dd'T'HH:mm':00'"}),
+        "productCode": null,
+        "productName": jarrow."Product",
+        "productNatural": (jarrow."Litres" replace  /,/ with ("")) as Number,
+        "productStandard": (jarrow."Litres 15" replace  /,/ with ("")) as Number,
+        "productWeight": (jarrow."Kg in air" replace  /,/ with ("")) as Number,
+        "density": jarrow."Density in vac",
+        "temperature": jarrow."Temperature",
+        "tank": jarrow."Tank Name",
+        "dutyType": null,
+        "loadNo": jarrow."Load No",
+        "customerRef": null, 
+        "carrier": jarrow."Carrier",
+        "description": null,
+        "cust_ref_no": null,
+        "destination": jarrow."Ship To",
+        "doc_num": null,
+        "dutyPayable": null,
+        "dutyFree": null,
+        "dutyOther": null,
+        "dutyPaid": null,
+        "dutyDrawback": null,
+        "dutyStatus": jarrow."Duty Status",
+        "clientCode": null,
+        "addve_ppm": null,
+        "stoltRef": null,
+        "productWeightinVac": jarrow."Kg in vac",
+        "cardNumber": null,
+        "carrierCode":null,
+        "tractorLicence":null,
+        "naturalVolumeRefuel":null,
+        "standardVolumeRefuel":null
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> -->
+			<!-- <http:request method="POST" doc:name="invokeSystemAPI" doc:id="d1c58197-3c9b-4f4b-92db-528ffcdbdc25" config-ref="HTTP_Request_configuration" path=" ${systemapi.liftingreports}" responseTimeout="${httpresponse.timeout}">
+			<reconnect frequency="${httpreconnection.frequency}" count="${httpreconnection.attempts}" />
+				<http:headers><![CDATA[#[output application/java
+-&#45;&#45;
+{
+	dataEntityName : vars.dataEntityName,
+	dataEntityValue : vars.dataEntityValue,
+	trackingID : vars.trackingID
+}]]]></http:headers>
+		</http:request> -->
+			<!-- <ee:transform doc:name="Transform Message" doc:id="346df739-eac7-4042-be41-7d95a65075ec" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0 
+import lines from dw::core::Strings 
+output application/json 
+-&#45;&#45; 
+payload map ((opayo, index) ->  {
+   "MessageClass4":opayo[0 to 55]
+})]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> -->
+			<ee:transform doc:name="Transform to JSON" doc:id="70adcd21-c839-4854-a37f-2eef1498f9d1" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.siteDetails]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="059792ab-0901-4b5b-9de5-432bcbb72bb7" message="((((((((((AfterFileReadingOutput))):#[payload]::::::"/>
+			<ee:transform doc:name="setRequestSiteFile" doc:id="509e9099-20ab-45ce-bd33-1644d8b9eb69" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/flatfile schemaPath = "schemas/opayositefile2.ffd"
+---
+{
+	RQH: {
+		//"File Creation Date": now() as String {
+		//	format: "yyyyMMdd"
+		//},
+		//"File Creation Time": now() as String {
+		//	format: "HHmmss"
+		//}
+		"Company Sending": "Harves",
+		"Company Receiving": "BP",
+		"Run Number": "0001",
+		"Filler": ""
+		
+	},
+	Batch: [{
+		TRND: (payload map ( payload01 , indexOfPayload01 ) -> {
+			//row: {
+				
+				"RecordType": payload01."Record Type",
+				"FixedSiteID": payload01."Fixed Site ID",
+                "OACSiteID": payload01."OAC Site ID",
+				"ChangeableSiteID": payload01."Changeable Site ID",
+				"CountryCode": payload01."Country Code",
+				"Brand": payload01."Brand",
+				"RoutexCardAcceptance": payload01."Routex Card Acceptance",
+				"SiteName": payload01."Site Name",
+				"LatinSiteName": payload01."Latin Site Name",
+				"PickupPoint": payload01."Pickup Point",
+				"StartDate": payload01."Start Date",
+				"EndDate": payload01."End Date",
+				"AddressLine1": payload01."Address Line 1",
+				"SiteRoadNumber": payload01."Site Road Number",
+				"AddressLine2": payload01."Address Line 2",
+				"AddressLine3": payload01."Address Line 3",
+				"AddressLine4": payload01."Address Line 4",
+				"Country": payload01."Country",
+				"PostCode": payload01."Post Code",				
+				"SiteTelephoneNumber": payload01."Site Telephone Number",
+				"SiteFaxNumber": payload01."Site Fax Number",
+				"SiteEmailAddress": payload01."Site Email Address",
+				"SiteOpeningHoursMonFriAM": payload01."Site Opening Hours1",
+				"SiteOpeningHoursMonFriPM": payload01."Site Opening Hours2",
+				"SiteOpeningHoursSaturdayAM": payload01."Site Opening Hours3",
+				"SiteOpeningHoursSaturdayPM": payload01."Site Opening Hours4",
+				"SiteOpeningHoursSundayAM": payload01."Site Opening Hours5",
+				"SiteOpeningHoursSundayPM": payload01."Site Opening Hours6",
+				"SiteType": payload01."Site Type",
+				"Latitude": payload01."Latitude",
+				"Longitude": payload01."Longitude",
+				"RegionCode": payload01."Region Code",
+				"IVMH-CIMCode": payload01."IVMH CIM Code",
+				"BPLoyaltyCardAcceptance": payload01."BP Loyalty Card Acceptance",
+				"TollPaymentsAcceptance": payload01."Toll Payments Acceptance",
+				"Bakery": payload01."Bakery",
+				"Restaurant": payload01."Restaurant",
+				"Bistro": payload01."Bistro",
+				"Shop": payload01."Shop",
+				"Supermarket": payload01."Supermarket",
+				"RedDiesel": payload01."Red Diesel",
+				"Tobacco": payload01."Tobacco",
+				"Alcohol": payload01."Alcohol",
+				"Lotto": payload01."Lotto",
+				"Open24Hours": payload01."Open 24 Hours",
+				"Unmanned": payload01."Unmanned",
+				"AutomaticPumps": payload01."Automatic Pumps",
+				"CarWash": payload01."Car Wash",
+				"JetWash": payload01."Jet Wash",
+				"HandCarWash": payload01."Hand Car Wash",
+				"Cashpoint": payload01."Cashpoint",
+				"DisabledFacilities": payload01."Disabled Facilities",
+				"HighSpeedDieselPump": payload01."High Speed Diesel Pump",
+				"Truck-suitableSite": payload01."Truck-suitable Site",
+				"TruckParking": payload01."Truck Parking",
+				"Lorry&TruckFuelTerminal": payload01."Lorry & Truck Fuel Terminal",
+				"TruckWash": payload01."Truck Wash",
+				"Toilets": payload01."Toilets",
+				"Wifi": payload01."Wifi",
+				"PremiumFuels": payload01."Premium Fuels",
+				"AdBlueCanister": payload01."AdBlue (Canister)",
+				"Autogas": payload01."Autogas",
+				"BottleGas": payload01."Bottle Gas",
+				"MotorwaySite": payload01."Motorway Site",
+				"PublicTelephones": payload01."Public Telephones",
+				"Subnetwork": payload01."Subnetwork",
+				"R4T": payload01."R4T",
+				"AdBluePump": payload01."AdBlue Pump",
+				"ChannelofTrade": payload01."Channel of Trade",
+				"NaturalGas": payload01."Natural Gas",
+				"UltimateMotorSpirit": payload01."Ultimate Motor Spirit",
+				"UltimateDiesel": payload01."Ultimate Diesel",
+				"TruckDiesel": payload01."Truck Diesel",
+				"PetitBistro": payload01."Petit Bistro",
+				"WildBeanCafé": payload01."Wild Bean Café",
+				"LPG": payload01."LPG",
+				"Electricity": payload01."Electricity",
+				"BpMeEnabled": payload01."BpMeEnabled",
+				"BpMeSupported": payload01."BpMeSupported",
+				"CheckInRadius": payload01."CheckInRadius",
+				"WhereCode": payload01."WhereCode",
+				"Filler": payload01."Filler"
+		})
+	}],
+	RQF: {
+		//"Total Passengers": "passe"
+		//"Run Number": "0001",
+		"Run Number": sizeOf(payload),
+		"Record Count": "000000001" ,
+		"Filler": ""
+	}
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="transactionDetailsContent" ><![CDATA[%dw 2.0
+output application/flatfile schemaPath = "schemas/opayositefile.ffd",
+// segmentIdent = "opayo"
+---
+
+(payload map ( payload01 , indexOfPayload01 ) -> {
+			//row: {
+				
+				"RecordType": payload01."Record Type",
+				"FixedSiteID": payload01."Fixed Site ID",
+                "OACSiteID": payload01."OAC Site ID",
+				"ChangeableSiteID": payload01."Changeable Site ID",
+				"CountryCode": payload01."Country Code",
+				"Brand": payload01."Brand",
+				"RoutexCardAcceptance": payload01."Routex Card Acceptance",
+				"SiteName": payload01."Site Name",
+				"LatinSiteName": payload01."Latin Site Name",
+				"PickupPoint": payload01."Pickup Point",
+				"StartDate": payload01."Start Date",
+				"EndDate": payload01."End Date",
+				"AddressLine1": payload01."Address Line 1",
+				"SiteRoadNumber": payload01."Site Road Number",
+				"AddressLine2": payload01."Address Line 2",
+				"AddressLine3": payload01."Address Line 3",
+				"AddressLine4": payload01."Address Line 4",
+				"Country": payload01."Country",
+				"PostCode": payload01."Post Code",				
+				"SiteTelephoneNumber": payload01."Site Telephone Number",
+				"SiteFaxNumber": payload01."Site Fax Number",
+				"SiteEmailAddress": payload01."Site Email Address",
+				"SiteOpeningHoursMonFriAM": payload01."Site Opening Hours1",
+				"SiteOpeningHoursMonFriPM": payload01."Site Opening Hours2",
+				"SiteOpeningHoursSaturdayAM": payload01."Site Opening Hours3",
+				"SiteOpeningHoursSaturdayPM": payload01."Site Opening Hours4",
+				"SiteOpeningHoursSundayAM": payload01."Site Opening Hours5",
+				"SiteOpeningHoursSundayPM": payload01."Site Opening Hours6",
+				"SiteType": payload01."Site Type",
+				"Latitude": payload01."Latitude",
+				"Longitude": payload01."Longitude",
+				"RegionCode": payload01."Region Code",
+				"IVMH-CIMCode": payload01."IVMH CIM Code",
+				"BPLoyaltyCardAcceptance": payload01."BP Loyalty Card Acceptance",
+				"TollPaymentsAcceptance": payload01."Toll Payments Acceptance",
+				"Bakery": payload01."Bakery",
+				"Restaurant": payload01."Restaurant",
+				"Bistro": payload01."Bistro",
+				"Shop": payload01."Shop",
+				"Supermarket": payload01."Supermarket",
+				"RedDiesel": payload01."Red Diesel",
+				"Tobacco": payload01."Tobacco",
+				"Alcohol": payload01."Alcohol",
+				"Lotto": payload01."Lotto",
+				"Open24Hours": payload01."Open 24 Hours",
+				"Unmanned": payload01."Unmanned",
+				"AutomaticPumps": payload01."Automatic Pumps",
+				"CarWash": payload01."Car Wash",
+				"JetWash": payload01."Jet Wash",
+				"HandCarWash": payload01."Hand Car Wash",
+				"Cashpoint": payload01."Cashpoint",
+				"DisabledFacilities": payload01."Disabled Facilities",
+				"HighSpeedDieselPump": payload01."High Speed Diesel Pump",
+				"Truck-suitableSite": payload01."Truck-suitable Site",
+				"TruckParking": payload01."Truck Parking",
+				"Lorry&TruckFuelTerminal": payload01."Lorry & Truck Fuel Terminal",
+				"TruckWash": payload01."Truck Wash",
+				"Toilets": payload01."Toilets",
+				"Wifi": payload01."Wifi",
+				"PremiumFuels": payload01."Premium Fuels",
+				"AdBlueCanister": payload01."AdBlue (Canister)",
+				"Autogas": payload01."Autogas",
+				"BottleGas": payload01."Bottle Gas",
+				"MotorwaySite": payload01."Motorway Site",
+				"PublicTelephones": payload01."Public Telephones",
+				"Subnetwork": payload01."Subnetwork",
+				"R4T": payload01."R4T",
+				"AdBluePump": payload01."AdBlue Pump",
+				"ChannelofTrade": payload01."Channel of Trade",
+				"NaturalGas": payload01."Natural Gas",
+				"UltimateMotorSpirit": payload01."Ultimate Motor Spirit",
+				"UltimateDiesel": payload01."Ultimate Diesel",
+				"TruckDiesel": payload01."Truck Diesel",
+				"PetitBistro": payload01."Petit Bistro",
+				"WildBeanCafé": payload01."Wild Bean Café",
+				"LPG": payload01."LPG",
+				"Electricity": payload01."Electricity",
+				"BpMeEnabled": payload01."BpMeEnabled",
+				"BpMeSupported": payload01."BpMeSupported",
+				"CheckInRadius": payload01."CheckInRadius",
+				"WhereCode": payload01."WhereCode",
+				"Filler": payload01."Filler"
+				  
+	
+	
+	//"Volume (LT)": payload01."Volume (LT)",
+    //"cc":payload01."Volume (LT)",
+    //"UOM": payload01."UOM",
+    //"Volume (Gallons)": payload01."Volume (Gallons)",
+    //"UOM": payload01."UOM",
+    //"Aircraft Reg No": payload01."Aircraft Reg No",
+    //"Flight Number": payload01."Flight Number",
+    //"Destination": payload01."Destination",
+    //"Domestic/ International": payload01."Domestic/ International",
+   // "Total": payload01."Total",
+    //"Hydrant Fee": payload01."Hydrant Fee",
+    //"UOM": payload01."UOM",
+   // "Throughput Fee": payload01."Throughput Fee",
+    //"UOM": payload01."UOM",
+    //"Storage Fee": payload01."Storage Fee",
+    //"UOM": payload01."UOM",
+    //"Attendance Fee": payload01."Attendance Fee",
+    //"Total Fees Applicable GBP": payload01."Total Fees Applicable GBP",
+    //"Total Fees Applicable USD": payload01."Total Fees Applicable USD"
+			//}
+		})]]></ee:set-variable>
+					<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+					<ee:set-variable variableName="originallPayload" ><![CDATA[%dw 2.0
+output application/flatfile schemaPath = "schemas/opayositefile2.ffd"
+---
+{
+	RQH: {
+		//"File Creation Date": now() as String {
+		//	format: "yyyyMMdd"
+		//},
+		//"File Creation Time": now() as String {
+		//	format: "HHmmss"
+		//}
+		"Company Sending": "Harves",
+		"Company Receiving": "BP",
+		"Run Number": "0001",
+		"Filler": ""
+		
+	},
+	Batch: [{
+		TRND: (payload map ( payload01 , indexOfPayload01 ) -> {
+			//row: {
+				
+				"RecordType": payload01."Record Type",
+				"FixedSiteID": payload01."Fixed Site ID",
+                "OACSiteID": payload01."OAC Site ID",
+				"ChangeableSiteID": payload01."Changeable Site ID",
+				"CountryCode": payload01."Country Code",
+				"Brand": payload01."Brand",
+				"RoutexCardAcceptance": payload01."Routex Card Acceptance",
+				"SiteName": payload01."Site Name",
+				"LatinSiteName": payload01."Latin Site Name",
+				"PickupPoint": payload01."Pickup Point",
+				"StartDate": payload01."Start Date",
+				"EndDate": payload01."End Date",
+				"AddressLine1": payload01."Address Line 1",
+				"SiteRoadNumber": payload01."Site Road Number",
+				"AddressLine2": payload01."Address Line 2",
+				"AddressLine3": payload01."Address Line 3",
+				"AddressLine4": payload01."Address Line 4",
+				"Country": payload01."Country",
+				"PostCode": payload01."Post Code",				
+				"SiteTelephoneNumber": payload01."Site Telephone Number",
+				"SiteFaxNumber": payload01."Site Fax Number",
+				"SiteEmailAddress": payload01."Site Email Address",
+				"SiteOpeningHoursMonFriAM": payload01."Site Opening Hours1",
+				"SiteOpeningHoursMonFriPM": payload01."Site Opening Hours2",
+				"SiteOpeningHoursSaturdayAM": payload01."Site Opening Hours3",
+				"SiteOpeningHoursSaturdayPM": payload01."Site Opening Hours4",
+				"SiteOpeningHoursSundayAM": payload01."Site Opening Hours5",
+				"SiteOpeningHoursSundayPM": payload01."Site Opening Hours6",
+				"SiteType": payload01."Site Type",
+				"Latitude": payload01."Latitude",
+				"Longitude": payload01."Longitude",
+				"RegionCode": payload01."Region Code",
+				"IVMH-CIMCode": payload01."IVMH CIM Code",
+				"BPLoyaltyCardAcceptance": payload01."BP Loyalty Card Acceptance",
+				"TollPaymentsAcceptance": payload01."Toll Payments Acceptance",
+				"Bakery": payload01."Bakery",
+				"Restaurant": payload01."Restaurant",
+				"Bistro": payload01."Bistro",
+				"Shop": payload01."Shop",
+				"Supermarket": payload01."Supermarket",
+				"RedDiesel": payload01."Red Diesel",
+				"Tobacco": payload01."Tobacco",
+				"Alcohol": payload01."Alcohol",
+				"Lotto": payload01."Lotto",
+				"Open24Hours": payload01."Open 24 Hours",
+				"Unmanned": payload01."Unmanned",
+				"AutomaticPumps": payload01."Automatic Pumps",
+				"CarWash": payload01."Car Wash",
+				"JetWash": payload01."Jet Wash",
+				"HandCarWash": payload01."Hand Car Wash",
+				"Cashpoint": payload01."Cashpoint",
+				"DisabledFacilities": payload01."Disabled Facilities",
+				"HighSpeedDieselPump": payload01."High Speed Diesel Pump",
+				"Truck-suitableSite": payload01."Truck-suitable Site",
+				"TruckParking": payload01."Truck Parking",
+				"Lorry&TruckFuelTerminal": payload01."Lorry & Truck Fuel Terminal",
+				"TruckWash": payload01."Truck Wash",
+				"Toilets": payload01."Toilets",
+				"Wifi": payload01."Wifi",
+				"PremiumFuels": payload01."Premium Fuels",
+				"AdBlueCanister": payload01."AdBlue (Canister)",
+				"Autogas": payload01."Autogas",
+				"BottleGas": payload01."Bottle Gas",
+				"MotorwaySite": payload01."Motorway Site",
+				"PublicTelephones": payload01."Public Telephones",
+				"Subnetwork": payload01."Subnetwork",
+				"R4T": payload01."R4T",
+				"AdBluePump": payload01."AdBlue Pump",
+				"ChannelofTrade": payload01."Channel of Trade",
+				"NaturalGas": payload01."Natural Gas",
+				"UltimateMotorSpirit": payload01."Ultimate Motor Spirit",
+				"UltimateDiesel": payload01."Ultimate Diesel",
+				"TruckDiesel": payload01."Truck Diesel",
+				"PetitBistro": payload01."Petit Bistro",
+				"WildBeanCafé": payload01."Wild Bean Café",
+				"LPG": payload01."LPG",
+				"Electricity": payload01."Electricity",
+				"BpMeEnabled": payload01."BpMeEnabled",
+				"BpMeSupported": payload01."BpMeSupported",
+				"CheckInRadius": payload01."CheckInRadius",
+				"WhereCode": payload01."WhereCode",
+				"Filler": payload01."Filler"
+		})
+	}],
+	RQF: {
+		//"Total Passengers": "passe"
+		"Run Number": "0001",
+		"Record Count": "000000001" ,
+		"Filler": ""
+	}
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Call-autogeneratedRunId-implSub_Flow" doc:id="c2472b32-34c8-4d9d-bbaa-10be405e86dc" name="opayo-bp-site-file-autogeneratedRunId-implSub_Flow"/>
+			<!-- <db:insert doc:name="InsertOpayoTransactionHeader" doc:id="6b6f7188-e1df-43a0-9419-bf7a48e8a199" config-ref="RetailInterface_Database_Config" autoGenerateKeys="true">
+			<db:sql ><![CDATA[INSERT INTO OpayoRunNumberBP (OpayoRunNumberBP) values (:OpayoRunNumberBP)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+			//FileID: vars.maxId.test default 1,
+			OpayoRunNumberBP: 1
+			
+		}]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="OpayoRunNumberBPID" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<db:bulk-insert doc:name="MessageClass4 Bulk insert" doc:id="f98d72ce-cacb-4262-be30-cfcc975324cd" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO OpayoTransactionHeader (ReservedUKCards2, AuthorisationMethod, DiscretionaryData2, TransactionNumber, AuthorisationCode, ShiftMark, TransactionTime, TransactionType, Amount, CardIssueNumber, CardholderNumber, DiscretionaryData1, TerminalType, CardExpiryDate, TransactionDate, ReservedUKCards1, TransactionSource, CreatedDate, UpdatedDate, SiteHeaderId, FileID) values (:ReservedUKCards2, :AuthorisationMethod, :DiscretionaryData2, :TransactionNumber, :AuthorisationCode, :ShiftMark, :TransactionTime, :TransactionType, :Amount, :CardIssueNumber, :CardholderNumber, :DiscretionaryData1, :TerminalType, :CardExpiryDate, :TransactionDate, :ReservedUKCards1, :TransactionSource, :CreatedDate, :UpdatedDate, :SiteHeaderId, :FileID)]]></db:sql>
+		</db:bulk-insert> 
+		<ee:transform doc:name="Transform Message" doc:id="47c4284a-14a4-4064-97cf-6fac695fd572" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+"generatedKey":payload[0].GENERATED_KEYS]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="ae1ac0c6-49e7-41cd-888b-0c7d56c04081" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="OpayoRunNumberBPIDValue" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+payload.generatedKey]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="286ee053-4cdc-4cc2-85c4-9cad0506c2e6" message=":OpayoRunNumberBPIDValue:#[vars.OpayoRunNumberBPIDValue]:"/>
+	 -->
+			<set-variable value="#[vars.OpayoRunNumberBPIDValue]" doc:name="Set Variable" doc:id="97c12d15-ad7f-4e66-8958-35a737982c19" variableName="runId" />
+			<logger level="INFO" doc:name="Logger" doc:id="0b0513b9-a1d6-480d-9a19-579cd6a63af0" message=":FinalRequest:::#[payload]::::"/>
+			<!-- <db:select doc:name="SelectMaxFileId" doc:id="6966e7ae-7206-4949-a216-db7c0d37bc52" config-ref="RetailInterface_Database_Config" target="FieldId1" transactionalAction="NOT_SUPPORTED">
+			<db:sql><![CDATA[SELECT max(FileId) as test from OpayoPayloadInfo]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="maxId" doc:id="bd3dd72b-29bd-463d-b74b-fb0d3f08bc59" message=":::AfterSelect))#[vars.FieldId1]:payload values:#[payload]:" />
+		<ee:transform doc:name="maxId" doc:id="792b4cb0-03c0-418c-89f2-ff1662c8d5cc">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="maxId" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+vars.FieldId1[0] default 0]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform> -->
+			<!-- <raise-error doc:name="Raise error" doc:id="af780a38-b232-4a13-a158-0362d2cb99a0" type="ANY"/> -->
+			<!-- <foreach doc:name="For Each" doc:id="16241410-7349-48d5-997c-612090fd09a5" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="b5b3ed13-0304-4af2-b6f3-15ee620a318c" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
+			</foreach> -->
+			<!-- <foreach doc:name="For Each" doc:id="966afe2b-6f51-4972-b870-9415208cdb5c" collection="#[vars.originallPayload.TransactionDetails]">
+				<flow-ref doc:name="test-poc-db-messageclass3-insertFlow4-final" doc:id="f1fc4697-72e6-49b8-abcc-6faffc45f608" name="test-poc-db-messageclass3-insertFlow4-final" target="messageClass3InsertedData"/>
+			</foreach> -->
+			<set-payload value="#[vars.originallPayload]" doc:name="Set Payload" doc:id="a5b172e2-1d62-4a99-bb1e-4dbb491ea191" />
+			<sftp:write doc:name="WriteSiteFile" doc:id="d0ed85a0-2202-4ccb-8561-b9c1d1591c41" config-ref="SFTP_Config" path="#[p('sftpdir.site.ffdOutput') ++ vars.runId ++ 'sitefile.ffd']">
+			</sftp:write>
+			<async doc:name="Async" doc:id="bb50ff94-e8b4-4128-a04d-ee64c137dad4">
+				<flow-ref doc:name="callPayloadLoggerEndFlow" doc:id="b9f3f319-9da9-44c4-959e-663d8d23d096" name="payloadLoggerEndFlow" />
+		</async>
+			<ee:transform doc:name="setTargetFolder" doc:id="c1e4c3d7-62e0-4f8e-936a-3cb95aa0c27c" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.site.processed')]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8166cd55-70be-42a2-94cd-7e7c870510f8" >
+					<ee:transform doc:name="setTargetFolder" doc:id="50d9b06c-ec2d-47d6-8da7-062de5e599c1" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="targetfolder" ><![CDATA[p('sftpdir.site.error')]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="endLog" doc:id="2bfb3c53-ae91-4614-9635-f2308da299b9" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "End of flow and data set to caller successfully"
+&#10;}]'/>
+		<error-handler ref="global-exceptionError_Handler" />
+	</flow>
+	<sub-flow name="opayo-bp-site-file-autogeneratedRunId-implSub_Flow" doc:id="0dab363d-a4cf-4091-a986-ad8c53eb708f" >
+		<db:insert doc:name="InsertOpayoTransactionHeader" doc:id="6ba557ba-2b01-4cce-8c21-0b7ff881fb2e" config-ref="RetailInterface_Database_Config" autoGenerateKeys="true">
+			<db:sql ><![CDATA[INSERT INTO OpayoRunNumberBP (OpayoRunNumberBP) values (:OpayoRunNumberBP)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+			//FileID: vars.maxId.test default 1,
+			OpayoRunNumberBP: 1
+			
+		}]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="OpayoRunNumberBPID" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<!-- <db:bulk-insert doc:name="MessageClass4 Bulk insert" doc:id="ee127d7b-90d1-444e-bb5d-fa1f6a7e43d4" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[INSERT INTO OpayoTransactionHeader (ReservedUKCards2, AuthorisationMethod, DiscretionaryData2, TransactionNumber, AuthorisationCode, ShiftMark, TransactionTime, TransactionType, Amount, CardIssueNumber, CardholderNumber, DiscretionaryData1, TerminalType, CardExpiryDate, TransactionDate, ReservedUKCards1, TransactionSource, CreatedDate, UpdatedDate, SiteHeaderId, FileID) values (:ReservedUKCards2, :AuthorisationMethod, :DiscretionaryData2, :TransactionNumber, :AuthorisationCode, :ShiftMark, :TransactionTime, :TransactionType, :Amount, :CardIssueNumber, :CardholderNumber, :DiscretionaryData1, :TerminalType, :CardExpiryDate, :TransactionDate, :ReservedUKCards1, :TransactionSource, :CreatedDate, :UpdatedDate, :SiteHeaderId, :FileID)]]></db:sql>
+		</db:bulk-insert>  -->
+		<ee:transform doc:name="Transform Message" doc:id="c30c39a7-f1c2-4993-930f-18f150606209" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"generatedKey":payload[0].GENERATED_KEYS]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a2dde2ed-1ad3-476c-b6a5-92811f3eb1ec" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="OpayoRunNumberBPIDValue" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.generatedKey]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e467cdb1-cfcf-44ea-b38e-109e964f0386" message=":OpayoRunNumberBPIDValue:#[vars.OpayoRunNumberBPIDValue]:"/>
+	</sub-flow>
+</mule>

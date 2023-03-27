@@ -7,7 +7,7 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>mule-application</packaging>
 
-	<name>opayo-flatefile-reading-final-poc-20-03-2023</name>
+	<name>opayo-flatefile-reading-final-poc-23-03-2023</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

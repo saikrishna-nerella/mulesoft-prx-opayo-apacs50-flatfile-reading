@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+	<flow name="opayo-generate-csv-ar-invoice-impl-schedular-flow" doc:id="929597bd-c99e-4d8e-b0b6-06767244e07e" >
+		<scheduler doc:name="Scheduler" doc:id="9d894fb0-2a19-46ec-98b6-10a7cfd1811f" >
+			<scheduling-strategy >
+				<fixed-frequency timeUnit="MINUTES" startDelay="1000"/>
+			</scheduling-strategy>
+		</scheduler>
+		<ee:transform doc:name="setVariables" doc:id="2cb45b1c-1963-456f-a33b-4efead694c7d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="interfaceID"><![CDATA[%dw 2.0
+output text/plain
+---
+p('OpayoInterfaceID')]]></ee:set-variable>
+				<ee:set-variable variableName="trackingID"><![CDATA[%dw 2.0
+output text/plain
+---
+uuid()]]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityName"><![CDATA[%dw 2.0
+output text/plain
+---
+'OpayoReport']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityType"><![CDATA[%dw 2.0
+output text/plain
+---
+'Alphanumeric']]></ee:set-variable>
+				<ee:set-variable variableName="dataEntityValue"><![CDATA[%dw 2.0
+output text/plain
+---
+attributes.fileName]]></ee:set-variable>
+				<ee:set-variable variableName="messageID" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<!-- <ee:transform doc:name="CSV" doc:id="c8c86ef8-9141-4d42-9a50-19c4b12fb852" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+-&#45;&#45;
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="csvValues" ><![CDATA[%dw 2.0
+output application/csv separator=";", header=false
+-&#45;&#45;
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="564892aa-bba3-4bca-9afd-a4fdc51378e0" message=":::AfterCSV DW: #[vars.csvValues]:"/> -->
+		<logger level="INFO" doc:name="logStart" doc:id="97d3fa83-da3d-4208-b3d2-5abad6f166e6" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "Start of flow and message received from listener"
+&#10;}]' />
+		<async doc:name="Async" doc:id="56b63b92-b855-46bb-b7c4-ee6fea7083fc">
+			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="58b76a4e-dbf4-4359-9bad-2ef7a34f02c6" name="payloadLoggerStartFlow" />
+		</async> 
+		<db:select doc:name="Invoide Data query" doc:id="1caf1139-2ac3-430c-aa82-9281f934a506" config-ref="RetailInterface_Database_Config">
+			<db:sql ><![CDATA[Select 
+salesOrder.[APDocNum] 'Inv_Nr',
+salesOrder.[APImportDate] 'Inv_date',
+OSH.[MerchantId] 'Site_Id',
+'TBC' 'Site_type',
+OTH.[TransactionDate] 'Trans_date',
+OTH.[TransactionTime] 'Trans_time',
+OTH.[CardholderNumber] 'Card_Nr',
+OPD.[ProductCode] 'Prod_code',
+T0.[ItemName] 'Prod_name',
+OPD.[ProductQuantity] 'Qty',
+OPD.[ProductValue] 'Gross_Amount_PP',
+OPD.[DiscountNet] 'Discount_Net_Inv',
+OPD.[NetAmount] 'Net_Inv',
+OPD.[VATAmount] 'VAT_Inv',
+OPD.[GrossAmount] 'Gross_Inv',
+'TBC' 'Voucher_Nr',
+OTH.[AuthorisationCode] 'Autho_Nr',
+'TBC' 'Driver_code',
+OVI.[KilometreMileage] 'Odometer'
+from BLASalesOrderTest salesOrder 
+inner join OpayoSiteheader OSH on OSH.GroupIdForSAPAndOpayo=salesOrder.SystemDocNum
+inner join OpayoTransactionHeader OTH on OTH.SiteHeaderId=OSH.SiteHeaderId
+inner join OpayoProductDetails OPD on OPD.TransactionHeaderID=OTH.TransactionHeaderID
+inner join OpayoVehicleInfo OVI on OVI.TransactionHeaderID=OTH.TransactionHeaderID
+inner join SAPLIVESVR.RET_UK_HE_BLA_TEST.dbo.[@OPAYO_PRODUCT_ROW] sop ON OPD.ProductCode=sop.U_OPAYOProduct and sop.U_Active='Y'  
+inner join  SAPLIVESVR.RET_UK_HE_BLA_TEST.dbo.OITM T0  on T0.[ItemCode]=sop.U_SAPProduct 
+where SOImported=1 
+and salesOrder.SystemDocNum='COPY100023-10003021-2023-03-22-4472'
+]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="DB data to JSON" doc:id="5a34045e-3782-4191-96f1-14b149385094" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var month = now() as Date {format: "MMM"} ++ "=,\n"
+---
+payload map ((item, index) -> {
+    
+    Inv_Nr: item.Inv_Nr default "",
+    Inv_date: item.Inv_date as Date as String  {format: "ddMMyy"} default "",
+    Site_Id: item.Site_Id default "",
+    Site_type: item.Site_type default "",
+    Trans_date: item.Trans_date as Date as String  {format: "ddMMyy"} default "",
+    Trans_time: item.Trans_time default "",
+    Card_Nr: item.Card_Nr default "",
+    Prod_code: item.Prod_code default "",
+    Prod_name: item.Prod_name default "",
+    Qty: if (item.Qty > 0) "+" ++ item.Qty  else item.Qty default "",
+    Gross_Amount_PP: if (item.Gross_Amount_PP > 0) "+" ++ item.Gross_Amount_PP  else item.Gross_Amount_PP default "",
+    Discount_Net_Inv: if (item.Discount_Net_Inv > 0) "+" ++ item.Discount_Net_Inv  else item.Discount_Net_Inv default "",
+    Net_Inv: if (item.Net_Inv > 0) "+" ++ item.Net_Inv  else item.Net_Inv default "",
+    VAT_Inv: if (item.VAT_Inv > 0) "+" ++ item.VAT_Inv  else item.VAT_Inv default "",
+    Gross_Inv: if (item.Gross_Inv > 0) "+" ++ item.Gross_Inv  else item.Gross_Inv default "",
+    Voucher_Nr: item.Voucher_Nr default "",
+    Autho_Nr: item.Autho_Nr default "",
+    Driver_code: item.Driver_code default "",
+    Odometer: item.Odometer default "",
+    "\n":"\n"
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="JSON to CSV" doc:id="338d9b42-66bd-438b-9b1f-56745382d92f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value='#[now() as Date {format: "MMM"}]' doc:name="Set Variable" doc:id="bd4c662e-dee4-4abc-b571-87d59d403f8a" variableName="month"/>
+		<sftp:write doc:name="Write AR Invoice File to SFTP" doc:id="ebcba75b-268d-4cd9-b5a8-b701bbe72271" config-ref="SFTP_Config" path="${sftp.ar.invoice.path}/bp-ar-invoice.csv">
+		</sftp:write>
+		<async doc:name="Async" doc:id="96c4d609-439e-482c-866c-9165c9798c5b">
+				<flow-ref doc:name="callPayloadLoggerEndFlow" doc:id="cf453dbe-8125-458c-b47a-e0c5db4f9ffd" name="payloadLoggerEndFlow" />
+		</async>
+		<logger level="INFO" doc:name="endLog" doc:id="092de87b-cba8-4544-9235-851ff9faff54" message='#[%dw 2.0
+&#10;output application/json
+&#10;---
+&#10;{
+&#10;appName: app.Name,
+&#10;timestamp: now(),
+&#10;businessInterface: vars.interfaceID,
+&#10;flowName: flow.Name,
+&#10;messageId: vars.messageID,
+&#10;trackingId: vars.trackingID,
+&#10;correlationId: null,
+&#10;dataEntityName: vars.dataEntityName,
+&#10;dataEntityType: vars.dataEntityType,
+&#10;dataEntityValue: vars.dataEntityValue,
+&#10;dataSource: vars.dataSource,
+&#10;message: "End of flow and data set to caller successfully"
+&#10;}]'/>
+	</flow>
+</mule>

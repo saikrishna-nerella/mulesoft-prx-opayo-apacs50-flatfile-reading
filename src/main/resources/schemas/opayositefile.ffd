@@ -1,0 +1,86 @@
+form: FIXEDWIDTH
+id: 'opayo'
+tag: 'opayo'
+name: Request Header Record
+values:
+- { name: 'RecordType', type: Integer, length: 2 }
+- { name: 'FixedSiteID', type: String, length: 10 }
+- { name: 'OACSiteID', type: String, length: 15 }
+- { name: 'ChangeableSiteID', type: Integer, length: 10 }
+- { name: 'CountryCode', type: Integer, length: 3 }
+- { name: 'Brand', type: String, length: 2 }
+- { name: 'RoutexCardAcceptance', type: String, length: 1 }
+- { name: 'SiteName', type: String, length: 30 }
+- { name: 'LatinSiteName', type: String, length: 30 }
+- { name: 'PickupPoint', type: String, length: 30 }
+- { name: 'StartDate', type: Integer, length: 8 }
+- { name: 'EndDate', type: String, length: 8 }
+- { name: 'AddressLine1', type: String, length: 35 }
+- { name: 'SiteRoadNumber', type: String, length: 8 }
+- { name: 'AddressLine2', type: String, length: 35 }
+- { name: 'AddressLine3', type: String, length: 35 }
+- { name: 'AddressLine4', type: String, length: 35 }
+- { name: 'Country', type: String, length: 20 }
+- { name: 'PostCode', type: String, length: 10 }
+- { name: 'SiteTelephoneNumber', type: String, length: 16 }
+- { name: 'SiteFaxNumber', type: String, length: 16 }
+- { name: 'SiteEmailAddress', type: String, length: 40 }
+- { name: 'SiteOpeningHoursMonFriAM', type: String, length: 11 }
+- { name: 'SiteOpeningHoursMonFriPM', type: String, length: 11 }
+- { name: 'SiteOpeningHoursSaturdayAM', type: String, length: 11 }
+- { name: 'SiteOpeningHoursSaturdayPM', type: String, length: 11 }
+- { name: 'SiteOpeningHoursSundayAM', type: String, length: 11 }
+- { name: 'SiteOpeningHoursSundayPM', type: String, length: 11 }
+- { name: 'SiteType', type: String, length: 2 }
+- { name: 'Latitude', type: String, length: 12 }
+- { name: 'Longitude', type: String, length: 12 }
+- { name: 'RegionCode', type: String, length: 2 }
+- { name: 'IVMH-CIMCode', type: String, length: 8 }
+- { name: 'BPLoyaltyCardAcceptance', type: String, length: 1 }
+- { name: 'TollPaymentsAcceptance', type: String, length: 1 }
+- { name: 'Bakery', type: String, length: 1 }
+- { name: 'Restaurant', type: String, length: 1 }
+- { name: 'Bistro', type: String, length: 1 }
+- { name: 'Shop', type: String, length: 1 }
+- { name: 'Supermarket', type: String, length: 1 }
+- { name: 'RedDiesel', type: String, length: 1 }
+- { name: 'Tobacco', type: String, length: 1 }
+- { name: 'Alcohol', type: String, length: 1 }
+- { name: 'Lotto', type: String, length: 1 }
+- { name: 'Open24Hours', type: String, length: 1 }
+- { name: 'UnmannedAutomaticPumps', type: String, length: 1 }
+- { name: 'CarWash', type: String, length: 1 }
+- { name: 'JetWash', type: String, length: 1 }
+- { name: 'HandCarWash', type: String, length: 1 }
+- { name: 'Cashpoint', type: String, length: 1 }
+- { name: 'DisabledFacilities', type: String, length: 1 }
+- { name: 'HighSpeedDieselPump', type: String, length: 1 }
+- { name: 'Truck-suitableSite', type: String, length: 1 }
+- { name: 'TruckParking', type: String, length: 1 }
+- { name: 'LorryTruckFuelTerminal', type: String, length: 1 }
+- { name: 'TruckWash', type: String, length: 1 }
+- { name: 'Toilets', type: String, length: 1 }
+- { name: 'Wifi', type: String, length: 1 }
+- { name: 'PremiumFuels', type: String, length: 1 }
+- { name: 'AdBlueCanister', type: String, length: 1 }
+- { name: 'Autogas', type: String, length: 1 }
+- { name: 'BottleGas', type: String, length: 1 }
+- { name: 'MotorwaySite', type: String, length: 1 }
+- { name: 'PublicTelephones', type: String, length: 1 }
+- { name: 'Subnetwork', type: Integer, format: { justify: zeroes }, length: 3 }
+- { name: 'R4T', type: String, length: 1 }
+- { name: 'AdBluePump', type: String, length: 1 }
+- { name: 'ChannelofTrade', type: String, length: 4 }
+- { name: 'NaturalGas', type: String, length: 1 }
+- { name: 'UltimateMotorSpirit', type: String, length: 1 }
+- { name: 'UltimateDiesel', type: String, length: 1 }
+- { name: 'TruckDiesel', type: String, length: 1 }
+- { name: 'PetitBistro', type: String, length: 1 }
+- { name: 'WildBeanCafé', type: String, length: 1 }
+- { name: 'LPG', type: String, length: 1 }
+- { name: 'Electricity', type: String, length: 1 }
+- { name: 'BpMeEnabled', type: String, length: 1 }
+- { name: 'BpMeSupported', type: String, length: 1 }
+- { name: 'CheckInRadius', type: Integer, format: { justify: zeroes }, length: 11 }
+- { name: 'WhereCode', type: String, length: 10 }
+- { name: 'Filler', type: String, length: 18 }
