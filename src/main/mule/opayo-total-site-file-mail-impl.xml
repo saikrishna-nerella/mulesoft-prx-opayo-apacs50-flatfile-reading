@@ -21,6 +21,7 @@ http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sft
 			<sftp:matcher filenamePattern="${filepattern.total}" regularFiles="REQUIRE"/>
 		</sftp:listener> 
 		<logger level="INFO" doc:name="Logger" doc:id="55fdbae8-b329-426e-aeef-053ab0820771" message="::Started::::::#[payload] ::"/>
+		<set-variable value="#[payload]" doc:name="origianalFile" doc:id="31b60946-682b-4b35-a861-0fb4c16ae521" variableName="origianalFile"/>
 		<ee:transform doc:name="setVariables" doc:id="e24d4ac2-4833-417e-afa7-77d371652a95" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -228,8 +229,8 @@ payload map ((opayo, index) ->  {
 					<email:content ><![CDATA[Email Content]]></email:content>
 				</email:body>
 				<email:attachments><![CDATA[#[{
-          'sitefile.xlsx' : "payload"
-        }]]]></email:attachments>
+(vars.dataEntityValue):vars.origianalFile	
+}]]]></email:attachments>
 			</email:send> 
 			<logger level="INFO" doc:name="Logger" doc:id="16db713f-67a1-4af7-994a-6ea9799555d1" message=":FinalRequest:::#[payload]::::"/>
 			<!-- <db:select doc:name="SelectMaxFileId" doc:id="50cb01c4-f01c-454b-b358-1dd629645ff7" config-ref="RetailInterface_Database_Config" target="FieldId1" transactionalAction="NOT_SUPPORTED">
