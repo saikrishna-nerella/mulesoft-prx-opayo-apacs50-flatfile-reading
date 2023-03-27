@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sft
 	<flow name="opayo-generate-csv-ar-invoice-impl-schedular-flow" doc:id="929597bd-c99e-4d8e-b0b6-06767244e07e" >
 		<scheduler doc:name="Scheduler" doc:id="9d894fb0-2a19-46ec-98b6-10a7cfd1811f" >
 			<scheduling-strategy >
-				<fixed-frequency timeUnit="MINUTES" startDelay="1000"/>
+				<cron expression="${cron.expression.arinvoice}" />
 			</scheduling-strategy>
 		</scheduler>
 		<ee:transform doc:name="setVariables" doc:id="2cb45b1c-1963-456f-a33b-4efead694c7d" >
@@ -83,7 +83,7 @@ payload]]></ee:set-variable>
 		<async doc:name="Async" doc:id="56b63b92-b855-46bb-b7c4-ee6fea7083fc">
 			<flow-ref doc:name="callPayloadLoggerStartFlow" doc:id="58b76a4e-dbf4-4359-9bad-2ef7a34f02c6" name="payloadLoggerStartFlow" />
 		</async> 
-		<db:select doc:name="Invoide Data query" doc:id="1caf1139-2ac3-430c-aa82-9281f934a506" config-ref="RetailInterface_Database_Config">
+		<db:select doc:name="Invoice Data query" doc:id="1caf1139-2ac3-430c-aa82-9281f934a506" config-ref="RetailInterface_Database_Config">
 			<db:sql ><![CDATA[Select 
 salesOrder.[APDocNum] 'Inv_Nr',
 salesOrder.[APImportDate] 'Inv_date',

@@ -8,7 +8,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<flow name="opayo-sale-order-store-procedure-call-impl-scheduler-flow" doc:id="40c913b4-86ed-4d6c-bfa1-ec7fdd7cda90" >
 		<scheduler doc:name="Scheduler" doc:id="94b4f58a-312a-45c2-995a-48af77946f06" >
 			<scheduling-strategy >
-				<fixed-frequency timeUnit="MINUTES" startDelay="1000"/>
+				<cron expression="${cron.expression.salesprocedure}" />
 			</scheduling-strategy>
 		</scheduler>
 		<ee:transform doc:name="setVariables" doc:id="dd73672c-a95e-46f7-99e3-bdcd05dd50a1" >

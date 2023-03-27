@@ -84,7 +84,17 @@ frequency:
   opayo: "30"
   thirdparty: "30"
   
-
+cron:
+  expression:
+    arinvoice: "0 0 0,22 ? * * *"
+    salesprocedure: "0 0 0,22 ? * * *"
+  
+opayodatabase:
+ dbhost: "192.168.100.245"
+ dbport: "1433"
+ username: "OpayoIntegration"
+ password: "Stateoil2022!"
+ databasename: "OpayoIntegration"
          
          
          
