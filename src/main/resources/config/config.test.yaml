@@ -30,7 +30,7 @@ sftp:
  reconnectionattempts: "3"
  ar:
   invoice:
-    path: "/DEV/Invoice"   
+    path: "/DEV/Invoice/"   
 
 sftpdir1:          
   Thirdparty:
@@ -90,7 +90,7 @@ cron:
     salesprocedure: "0 0 0,22 ? * * *"
   
 opayodatabase:
- dbhost: "192.168.100.245"
+ dbhost: "192.168.100.182"
  dbport: "1433"
  username: "OpayoIntegration"
  password: "Stateoil2022!"

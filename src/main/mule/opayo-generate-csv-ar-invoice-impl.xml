@@ -155,7 +155,7 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<set-variable value='#[now() as Date {format: "MMM"}]' doc:name="Set Variable" doc:id="bd4c662e-dee4-4abc-b571-87d59d403f8a" variableName="month"/>
-		<sftp:write doc:name="Write AR Invoice File to SFTP" doc:id="ebcba75b-268d-4cd9-b5a8-b701bbe72271" config-ref="SFTP_Config" path="${sftp.ar.invoice.path}/bp-ar-invoice.csv">
+		<sftp:write doc:name="Write AR Invoice File to SFTP" doc:id="ebcba75b-268d-4cd9-b5a8-b701bbe72271" config-ref="SFTP_Config" path="${sftp.ar.invoice.path}bp-ar-invoice.csv">
 		</sftp:write>
 		<async doc:name="Async" doc:id="96c4d609-439e-482c-866c-9165c9798c5b">
 				<flow-ref doc:name="callPayloadLoggerEndFlow" doc:id="cf453dbe-8125-458c-b47a-e0c5db4f9ffd" name="payloadLoggerEndFlow" />

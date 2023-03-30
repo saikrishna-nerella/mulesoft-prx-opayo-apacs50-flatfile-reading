@@ -32,7 +32,7 @@ segments:
   - { name: 'TransactionSource', type: Integer, length: 1 }
   - { name: 'CardholderNumber', type: String, length: 19 }
   - { name: 'CardExpiryDate', type: Integer, length: 4 }
-  - { name: 'TransactionDate', type: Integer, length: 6 }
+  - { name: 'TransactionDate', type: String, length: 6 }
   - { name: 'TransactionTime', type: Integer, length: 4 }
   - { name: 'Amount', type: Integer, length: 7 }
   - { name: 'TransactionType', type: Integer, length: 1 }

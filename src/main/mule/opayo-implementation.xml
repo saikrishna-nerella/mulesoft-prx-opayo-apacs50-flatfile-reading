@@ -382,6 +382,28 @@ output application/json
 }]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
+			<ee:transform doc:name="Find Duplicate Message Class 3 &amp; 4" doc:id="3efda14a-00b8-40cd-a955-a62918250744">
+								<ee:message>
+								</ee:message>
+								<ee:variables>
+							<ee:set-variable variableName="duplicateMessageClass"><![CDATA[%dw 2.0
+output application/json  
+var messsageClass4 =  flatten(vars.originallPayload.TransactionDetails.*MessageClass4) map ((item, index) -> 
+(item.TransactionNumber))
+var messsageClass3 =  flatten(vars.originallPayload.TransactionDetails.*MessageClass3) map ((item, index) -> 
+(item.TransactionNumber))
+fun getDistinctValues(classObj) = classObj distinctBy $
+ fun checkDuplicate(distinctValueObj, classObj) = (distinctValueObj map(key,value) -> {
+    count : if(sizeOf((classObj map $ == key) filter $ ) > 1) key else null
+
+}) filter $.count !=null 
+---
+{
+messageClass4: (sizeOf((checkDuplicate(getDistinctValues(messsageClass4),messsageClass4).count)) default 0) > 0 default false,
+messageClass3: (sizeOf((checkDuplicate(getDistinctValues(messsageClass3),messsageClass3).count)) default 0) > 0 default false
+}]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
 			<logger level="INFO" doc:name="Logger" doc:id="882721fe-5104-4db7-ab7c-5ce0321e123c" message=":FinalRequest:::#[payload]::::"/>
 			<!-- <db:select doc:name="SelectMaxFileId" doc:id="a80d3825-7210-475f-9411-ff9b778ebfbf" config-ref="RetailInterface_Database_Config" target="FieldId1" transactionalAction="NOT_SUPPORTED">
 			<db:sql><![CDATA[SELECT max(FileId) as test from OpayoPayloadInfo]]></db:sql>
@@ -398,8 +420,57 @@ vars.FieldId1[0] default 0]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform> -->
 			<!-- <raise-error doc:name="Raise error" doc:id="b27f02ef-7116-4073-93fc-d1c4698823d1" type="ANY"/> -->
-			<flow-ref doc:name="tblOpayoPayloadInfo-insertFlow" doc:id="eea23351-600b-41ba-a264-b77ff36d8069" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-1" target="opayoPayloadInsertData"/>
-			<try doc:name="Try" doc:id="4c4f3fbf-1ed0-4e3a-9485-d5999ed17795" transactionalAction="ALWAYS_BEGIN">
+			<choice doc:name="Choice" doc:id="a6b7a7fc-5b93-4467-94d7-8c6160347489" >
+				<when expression='#[(payload.TransactionDetails.*TransactionHeader.TransactionHeaderValue map ((item, index) -&gt; {&#10;    isGBP: splitBy(item, ",") contains  ("GBP")&#10;})).*isGBP contains  (false)]'>
+					<ee:transform doc:name="Transform Message" doc:id="8dcc6c2d-477e-4f9d-9259-983fc4ef82f4" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="status" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: 0,
+	errorMessage: "One of the transaction Currency code not in GBP"
+	}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="tblOpayoPayloadInfo-insertFlow" doc:id="eea23351-600b-41ba-a264-b77ff36d8069" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-1" target="opayoPayloadInsertData" />
+				</when>
+				<when expression="#[vars.duplicateMessageClass.messageClass4 == true or vars.duplicateMessageClass.messageClass3 == true]">
+					<logger level="INFO" doc:name="Logger" doc:id="8fe32eaf-f3b4-4b3c-b238-97d12c6c9d91" />
+					<ee:transform doc:name="Transform Message" doc:id="d4ee8df9-c6ea-4cdc-b36c-46df2029c970" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="status" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: 0,
+	errorMessage: if(vars.duplicateMessageClass.messageClass4 == true)  "MessageClass4\Transaction Details Duplicated" else if (vars.duplicateMessageClass.messageClass3 == true) "MessageClass3\Vehicle information Duplicated" else "MessageClass3\4 information Duplicated"
+	}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="tblOpayoPayloadInfo-insertFlow" doc:id="42d9c49a-54e7-4c68-9d6c-e97b94667443" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-1" target="opayoPayloadInsertData" />
+					
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Transform Message" doc:id="488745af-a783-4736-b4b5-4abcc795c17e" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="status" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: 1,
+	errorMessage: "Data Inserted into Opayo Integration DB"
+	}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<flow-ref doc:name="tblOpayoPayloadInfo-insertFlow" doc:id="1712549c-6a36-4720-b916-1dd10ac12edb" name="test-poc-db-tblOpayoPayloadInfo-insertFlow1-final-1" target="opayoPayloadInsertData" />
+					<try doc:name="Try" doc:id="4c4f3fbf-1ed0-4e3a-9485-d5999ed17795" transactionalAction="ALWAYS_BEGIN">
 				<foreach doc:name="For Each" doc:id="e463a69b-d012-4b61-8029-ad7b7c037fc2" collection="#[payload.TransactionDetails]" counterVariableName="posCounter">
 				<ee:transform doc:name="Each Point Of Sale Payload" doc:id="634195bd-9f28-4976-9487-e42c48bc2681">
 					<ee:message>
@@ -411,14 +482,31 @@ output application/json
 payload]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<flow-ref doc:name="calling-db-insert-implementationFlow-OpayoSiteheader-ok" doc:id="aaf44c2c-68a0-4286-b734-51ddecdcd67c" name="test-poc-db-insertFlow-final" target="headerTransactionInserted" />
+							<flow-ref doc:name="calling-db-insert-implementationFlow-OpayoSiteheader-ok" doc:id="aaf44c2c-68a0-4286-b734-51ddecdcd67c" name="test-poc-db-insertFlow-final" target="headerTransactionInserted" />
 			</foreach>
-				<error-handler >
-					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="db939530-fc6b-4d19-ac1b-61fbad9fd599" >
-						<logger level="INFO" doc:name="Logger" doc:id="b05a7f2b-35d3-4c46-aa5f-5ab39878159d" message=":OnErrorPropagate:#[payload.error.errorDescription]::"/>
+				<error-handler>
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="db939530-fc6b-4d19-ac1b-61fbad9fd599">
+						<logger level="INFO" doc:name="Logger" doc:id="b05a7f2b-35d3-4c46-aa5f-5ab39878159d" message="Transaction Rolled back due to error type '#[error.errorType]' and error description '#[error.description]'" />
+								<ee:transform doc:name="Transform Message" doc:id="d50aef93-86bf-4368-a3dd-e3efb5b11cf7" >
+									<ee:message >
+									</ee:message>
+									<ee:variables >
+										<ee:set-variable variableName="status" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: 0,
+	errorMessage:"Transaction Rolled back due to error type"
+	}]]></ee:set-variable>
+									</ee:variables>
+								</ee:transform>
+								<flow-ref doc:name="OpayoPayloadInfo-updateFlow" doc:id="ee00e9e5-5db9-4f57-85b7-33e007d8f929" name="OpayoPayloadInfo-updateFlow"/>
+					<flow-ref doc:name="callCreateNotificationFlow" doc:id="c33a7dd8-56b7-456d-b4bd-8e7b64df80f8" name="createNotificationFlow" />
 					</on-error-propagate>
 				</error-handler>
 			</try>
+				</otherwise>
+			</choice>
 			<!-- <foreach doc:name="For Each" doc:id="389067ff-08ab-4d0b-bd6e-f1356d054bce" collection="#[vars.originallPayload.TransactionDetails]">
 				<flow-ref doc:name="test-poc-db-messageclass4-insertFlow-final-OpayoTransactionHeader" doc:id="0e632a09-5e7c-44eb-bb1a-758f270df6a1" name="test-poc-db-messageclass4-insertFlow-final" target="message4ClassInsertedData"/>
 			</foreach> -->
